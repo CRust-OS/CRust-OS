@@ -1,4 +1,4 @@
-#include <xen/elfnote.h>
+#include "xen/elfnote.h"
 
 // Based on the ELF specification, under "Note Section"
 #define ELFNOTE_ENTRY(type, value) \
