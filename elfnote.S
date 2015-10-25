@@ -6,7 +6,7 @@
 .p2align 2; \
 .long 2f - 1f; \
 .long 4f - 3f; \
-.long XEN_ELFNOTE_INFO; \
+.long type; \
 1: .asciz "Xen"; \
 2: .p2align 2; \
 3: value; \
