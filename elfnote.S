@@ -1,5 +1,9 @@
 #include <xen/elfnote.h>
 
+.global HYPERCALL_PAGE
+
+HYPERCALL_PAGE = 2
+
 // Based on the ELF specification, under "Note Section"
 #define ELFNOTE_ENTRY(type, value) \
 .subsection type; \
@@ -16,7 +20,7 @@
 	PAGE_SIZE = 0x1000
 	//See xen/elfnote.h for more info
 	ELFNOTE_ENTRY(XEN_ELFNOTE_ENTRY,          .quad 0)
-	ELFNOTE_ENTRY(XEN_ELFNOTE_HYPERCALL_PAGE, .quad 2 * PAGE_SIZE)
+	ELFNOTE_ENTRY(XEN_ELFNOTE_HYPERCALL_PAGE, .quad HYPERCALL_PAGE * PAGE_SIZE)
 	ELFNOTE_ENTRY(XEN_ELFNOTE_VIRT_BASE,      .quad 0x0)
 	ELFNOTE_ENTRY(XEN_ELFNOTE_XEN_VERSION,    .asciz "xen-4.9")
 	ELFNOTE_ENTRY(XEN_ELFNOTE_GUEST_OS,       .asciz "crust")
