@@ -1,10 +1,14 @@
-PHDRS {
-	elfnote PT_NOTE;
-    text PT_LOAD;
-}
-
 SECTIONS {
-	. = SIZEOF_HEADERS;
-	elfnote : { *(elfnote) } :elfnote
-    .text : { *(.text) } :text
+    . = 0x10000;
+    .text : {
+        *(.text)
+    } /* = 0x9090 */
+    .note : {
+        *(.note)
+        *(.note.*)
+    }
+    .data : {
+        *(.data)
+        *(.data.*)
+    }
 }

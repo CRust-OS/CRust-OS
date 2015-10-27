@@ -8,7 +8,7 @@
 
 #----------------------------------------------------------------------------
 # Kernel image file.
-kernel = "crust.gz"
+kernel = "crust"
 
 # Initial memory allocation (in megabytes) for the new domain.
 memory = 32
@@ -17,3 +17,5 @@ memory = 32
 name = "Crust-OS"
 
 on_crash = 'destroy'
+
+#serial='pty'
