@@ -46,15 +46,26 @@ XEN_ELFNOTE(XEN_ELFNOTE_XEN_VERSION, .asciz "xen-3.0")
 .global _start
 
 _start:
+    mov %esp, stack_end
+    call loop_rs
+    // call loop
+
+say_hello:
     mov %rcx, CONSOLEIO_write
     mov %rdx, hello_len
     mov %rbx, hello
-    // call HYPERCALL_PAGE * PAGE_SIZE + __HYPERVISOR_console_io * 32
-    loop: jmp loop
+    call HYPERCALL_PAGE * PAGE_SIZE + __HYPERVISOR_console_io * 32
+
+loop:
+    jmp loop
 
 .data
     hello: .asciz "Hello, Xen!\n"
     hello_len=13
+
+stack_start:
+    .org 2*PAGE_SIZE
+stack_end:
 
 /* PV entry point. */
 // GLOBAL(_start)
