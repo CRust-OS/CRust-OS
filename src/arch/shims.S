@@ -1,0 +1,5 @@
+fmod:
+    hlt
+
+fmodf:
+    hlt
