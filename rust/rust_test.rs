@@ -32,7 +32,7 @@ macro_rules! hypercall3 {
             let a2 : i64 = $a2 as i64;
             let a3 : i64 = $a3 as i64;
             //: "=a"(__res), "=edi"(__ign1), "=esi"(__ign2),"=d"(__ign3)
-            asm!(concat!("call HYPERCALL_PAGE + ",$name,"*32")
+            asm!(concat!("call HYPERCALL_PAGE_OFFSET + ",$name,"*32")
                 : "={ax}"(__res),"={Di}"(__ign1),"={Si}"(__ign2),"={dx}"(__ign3)
                 : "1"(a1), "2"(a2), "3"(a3)				
                 : "memory" 
@@ -59,7 +59,7 @@ const HELLO : &'static str = "HELLO FROM RUST";
 
 #[no_mangle]
 pub extern fn say_hello_rs(){
-    let a = ['A'; 16];
-    loop {};
+//    let a = ['A'; 16];
     print(HELLO.as_ptr(), HELLO.len());
+//    while(true) {}
 }

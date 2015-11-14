@@ -1,6 +1,13 @@
 // #include <arch/x86/page.h>
 
 #include <xen/elfnote.h>
+PAGE_SIZE = 0x1000;
+HYPERCALL_PAGE = 0x0;
+HYPERCALL_PAGE_OFFSET = HYPERCALL_PAGE * PAGE_SIZE;
+HYPERCALL_PAGE_END = HYPERCALL_PAGE_OFFSET + PAGE_SIZE;
+STACK_TOP = (HYPERCALL_PAGE + 1) * PAGE_SIZE;
+STACK_LENGTH = 0x2;
+STACK_BOTTOM = STACK_TOP + (STACK_LENGTH * PAGE_SIZE)
 
 #define XEN_ELFNOTE(type, desc)                     \
     .pushsection .note.Xen                        ; \
@@ -13,9 +20,6 @@
 3:desc                    /* desc   */            ; \
 4:.align 4                                        ; \
     .popsection
-
-HYPERCALL_PAGE=0x2
-PAGE_SIZE=0x1000
 
 // HYPERCALLS
 __HYPERVISOR_console_io=18
@@ -33,7 +37,7 @@ XEN_ELFNOTE(XEN_ELFNOTE_GUEST_VERSION, .asciz "0.1")
 
 /* PV loader */
 XEN_ELFNOTE(XEN_ELFNOTE_LOADER, .asciz "generic")
-XEN_ELFNOTE(XEN_ELFNOTE_HYPERCALL_PAGE, .quad HYPERCALL_PAGE * PAGE_SIZE)
+XEN_ELFNOTE(XEN_ELFNOTE_HYPERCALL_PAGE, .quad HYPERCALL_PAGE_OFFSET)
 
 /* Xen ABI information */
 XEN_ELFNOTE(XEN_ELFNOTE_XEN_VERSION, .asciz "xen-3.0")
@@ -41,31 +45,13 @@ XEN_ELFNOTE(XEN_ELFNOTE_XEN_VERSION, .asciz "xen-3.0")
 // XEN_ELFNOTE(XEN_ELFNOTE_PAE_MODE, .asciz "yes")
 
 .text
-.org 8*PAGE_SIZE
-
-.global _start, HYPERCALL_PAGE, fmod, fmodf
+.global _start, HYPERCALL_PAGE, fmod, fmodf, HYPERCALL_PAGE_OFFSET, STACK_TOP, STACK_LENGTH, STACK_BOTTOM, HYPERCALL_PAGE_END
 
 _start:
-    mov %esp, stack_end
+    mov %esp, STACK_BOTTOM
     call say_hello_rs
-    // call loop_rs
-
-say_hello:
-    // mov %rcx, CONSOLEIO_write
-    // mov %rdx, hello_len
-    // mov %rbx, hello
-    // mov CONSOLEIO_write, %rdi
-    // mov hello_len, %rdx
-    // mov hello_len, %rcx
-    // mov hello, %rsi
-    mov CONSOLEIO_write, %rcx
-    mov hello_len, %rdx
-    mov hello, %rbx
-    // mov hello_len, %edx
-    // mov hello, %esi
-    // mov CONSOLEIO_write, %edi
-    call HYPERCALL_PAGE * PAGE_SIZE + (__HYPERVISOR_console_io * 32)
-    ret
+    hlt    
+// call loop_rs
 
 fmodf:
     ret
@@ -76,10 +62,6 @@ fmod:
 .data
     hello: .asciz "Hello, Xen!\n"
     hello_len=13
-
-stack_start:
-    .org 2*PAGE_SIZE
-stack_end:
 
 /* PV entry point. */
 // GLOBAL(_start)
