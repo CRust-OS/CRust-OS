@@ -43,21 +43,35 @@ XEN_ELFNOTE(XEN_ELFNOTE_XEN_VERSION, .asciz "xen-3.0")
 .text
 .org 8*PAGE_SIZE
 
-.global _start
+.global _start, HYPERCALL_PAGE, fmod, fmodf
 
 _start:
     mov %esp, stack_end
-    call loop_rs
-    // call loop
+    call say_hello_rs
+    // call loop_rs
 
 say_hello:
-    mov %rcx, CONSOLEIO_write
-    mov %rdx, hello_len
-    mov %rbx, hello
-    call HYPERCALL_PAGE * PAGE_SIZE + __HYPERVISOR_console_io * 32
+    // mov %rcx, CONSOLEIO_write
+    // mov %rdx, hello_len
+    // mov %rbx, hello
+    // mov CONSOLEIO_write, %rdi
+    // mov hello_len, %rdx
+    // mov hello_len, %rcx
+    // mov hello, %rsi
+    mov CONSOLEIO_write, %rcx
+    mov hello_len, %rdx
+    mov hello, %rbx
+    // mov hello_len, %edx
+    // mov hello, %esi
+    // mov CONSOLEIO_write, %edi
+    call HYPERCALL_PAGE * PAGE_SIZE + (__HYPERVISOR_console_io * 32)
+    ret
 
-loop:
-    jmp loop
+fmodf:
+    ret
+
+fmod:
+    ret
 
 .data
     hello: .asciz "Hello, Xen!\n"
