@@ -59,5 +59,7 @@ const HELLO : &'static str = "HELLO FROM RUST";
 
 #[no_mangle]
 pub extern fn say_hello_rs(){
+    let a = ['A'; 16];
+    loop {};
     print(HELLO.as_ptr(), HELLO.len());
 }

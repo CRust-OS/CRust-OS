@@ -8,7 +8,7 @@ crust: elfnote.o crust.lds librustlib.a
 	ld -o crust -T crust.lds elfnote.o librustlib.a
 
 elfnote.o: elfnote.S
-	gcc -c elfnote.S
+	gcc -gstabs -c elfnote.S
 
 #init_console.o: init_console.c
 	#gcc -I include -c init_console.c
@@ -20,10 +20,10 @@ elfnote.o: elfnote.S
 	#rustc -Z no-landing-pads --crate-type staticlib rlibc.rs
 
 librustlib.a: rust/rlibc.rs rust/rust_test.rs rust/rustlib.rs
-	rustc -Z no-landing-pads rust/rustlib.rs
+	rustc -g -Z no-landing-pads rust/rustlib.rs
 
 clean:
 	-rm *.o
-	-rm librust.a
+	-rm librustlib.a
 	-rm crust
 	-rm crust.gz
