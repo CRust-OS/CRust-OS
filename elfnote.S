@@ -49,6 +49,7 @@ XEN_ELFNOTE(XEN_ELFNOTE_XEN_VERSION, .asciz "xen-3.0")
 
 _start:
     mov %esp, STACK_BOTTOM
+    mov %ebp, STACK_BOTTOM
     call say_hello_rs
     hlt    
 // call loop_rs
