@@ -10,6 +10,7 @@ pub mod hypercalls;
 
 #[no_mangle]
 pub extern fn main() {
+    hypercalls::block();
     hypercalls::say_hello();
     while true {}
 }
