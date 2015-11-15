@@ -1,3 +1,4 @@
+ENTRY(_start)
 SECTIONS {
     .bss : ALIGN(0x1000) {
         HYPERCALL_PAGE = .;
@@ -6,9 +7,12 @@ SECTIONS {
         . += 0x2000;
         STACK_BOTTOM = .;
         *(.bss);
-	*(.bss.*);
+        *(.bss.*);
     }
-
+    .text : {
+        *(.text);
+        *(.text.*);
+    }
     .data : {
         *(.data);
         *(.data.*);

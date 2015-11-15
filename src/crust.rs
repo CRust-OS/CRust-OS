@@ -7,4 +7,5 @@ pub mod shims;
 
 #[no_mangle]
 pub extern fn main() {
+    while true {}
 }
