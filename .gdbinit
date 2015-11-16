@@ -1,4 +1,4 @@
-file ./crust
+file ./bin/crust
 dir .
 
 target remote localhost:9999
