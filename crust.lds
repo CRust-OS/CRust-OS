@@ -9,11 +9,11 @@ SECTIONS {
         *(.bss);
         *(.bss.*);
     }
-    .text : {
+    .text : ALIGN(0x1000) {
         *(.text);
         *(.text.*);
     }
-    .data : {
+    .data : ALIGN(0x1000) {
         *(.data);
         *(.data.*);
     }
