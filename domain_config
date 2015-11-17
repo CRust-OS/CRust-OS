@@ -14,4 +14,4 @@ memory = 64
 # A name for your domain. All domains must have different names.
 name = "CRust-OS"
 on_crash = 'destroy'
-serial='pty'
+serial='tty'

@@ -1,3 +1,4 @@
+.global fmod, fmodf
 fmod:
     hlt
 

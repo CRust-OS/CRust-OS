@@ -1,4 +1,5 @@
-macro_rules! hypercall0 {
+#[macro_export]
+macro_rules! hypercall {
     ( $name : expr ) => {
         unsafe { 
             let mut __res : u64 = 0;
@@ -10,9 +11,6 @@ macro_rules! hypercall0 {
                 );					
         }
     };
-}
-
-macro_rules! hypercall1 {
     ( $name : expr, $a1 : expr ) => {
         unsafe { 
             let mut __res : u64 = 0;
@@ -26,9 +24,6 @@ macro_rules! hypercall1 {
                 );					
         }
     };
-}
-
-macro_rules! hypercall2 {
     ( $name : expr, $a1 : expr, $a2 : expr ) => {
         unsafe { 
             let mut __res : u64 = 0;
@@ -44,9 +39,6 @@ macro_rules! hypercall2 {
                 );					
         }
     };
-}
-
-macro_rules! hypercall3 {
     ( $name : expr, $a1 : expr, $a2 : expr, $a3 : expr ) => {
         unsafe { 
             let mut __res : u64 = 0;
@@ -67,30 +59,56 @@ macro_rules! hypercall3 {
     };
 }
 
-macro_rules! CONSOLEIO {
-    () => { 18 };
+#[macro_export]
+macro_rules! CMD {
+    ( CONSOLEIO ) => { 18 };
+    ( SCHEDOP ) => { 29 };
+    ( EVENT_CHANNEL_OP ) => { 32 };
 }
 
-const CONSOLEIO_WRITE : usize = 0;
-const CONSOELIO_READ : usize = 1;
+#[macro_export]
+macro_rules! CONSOLEIO {
+    ( WRITE ) => {0};
+    ( READ ) => {1};
+}
 
+#[macro_export]
+macro_rules! SCHEDOP {
+    (BLOCK) => {1};
+    (foo) => {1}
+}
+
+#[macro_export]
+macro_rules! EVENTCHANOP {
+    ( BIND_INTERDOMAIN) => {0};
+    ( BIND_VIRTQ ) => {1};
+    ( BIND_PIRQ ) => {2};
+    ( CLOSE ) => {3};
+    ( SEND ) => {4};
+    ( STATUS ) => {5};
+    ( ALLOC_UNBOUND ) => {6};
+    ( BIND_IPI ) => {7};
+    ( BIND_VCPU ) => {8};
+    ( UNMASK ) => {9};
+    ( RESET ) => {10};
+    (INIT_CONTROL) => {11};
+    (EXPAND_ARRAY) => {12};
+    (SET_PRIORITY) => {13};
+}
+
+// TODO: Use AsRef<str> 
 #[no_mangle]
 pub extern fn print(s : *const u8, len : usize) {
-    hypercall3!(CONSOLEIO!(), CONSOLEIO_WRITE, len, s);
+    hypercall!(CMD!(CONSOLEIO), CONSOLEIO!(WRITE), len, s);
 }
 
 
 #[no_mangle]
 pub extern fn say_hello(){
-    let hell = "hell FROM RUST";
-    print(hell.as_ptr(), hell.len());
+    let hello = "hello FROM RUST";
+    print(hello.as_ptr(), hello.len());
 }
 
-macro_rules! SCHEDOP {
-    () => {29};
-}
-
-const SCHEDOP_BLOCK : usize = 1;
 pub extern fn block(){
-    hypercall1!(SCHEDOP!(), SCHEDOP_BLOCK);
+    hypercall!(CMD!(SCHEDOP), SCHEDOP!(BLOCK));
 }

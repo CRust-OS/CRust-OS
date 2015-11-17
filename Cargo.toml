@@ -5,3 +5,6 @@ authors = ["Carl Patenaude-Poulin <carl.patenaudepoulin@mail.mcgill.ca>", "Scott
 
 [lib]
 crate-type = ["staticlib"]
+
+[dependencies]
+rlibc = "0.1"
