@@ -36,8 +36,12 @@ xl_console: domain_running
 	@echo Starting console - use C-] to exit
 	xl console $(DOMAIN_ID)
 
-xl_destroy: domain_running
+xl_destroy:
+ifdef DOMAIN_ID
 	xl destroy $(DOMAIN_ID)
+else
+	$(error $(DOMAIN_NAME) is not running)
+endif
 
 gdbsx: domain_running
 	gdbsx -a $(DOMAIN_ID) 64 $(PORT) > /dev/null
