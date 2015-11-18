@@ -18,10 +18,10 @@ clean:
 	-rm -rf bin
 
 #Conceptually a part of the "start" goal, but we need to create the domain before the $(eval DOMAIN_ID=...) gets expanded.
-create: bin/crust
+create_domain: bin/crust
 	xl create -p crust.cfg 'name="$(DOMAIN_NAME)"'
 
-start: bin/crust
+start: bin/crust create_domain
 	$(eval DOMAIN_ID=$(shell xl domid $(DOMAIN_NAME)))
 	gdbsx -a $(DOMAIN_ID) 64 $(PORT) > /dev/null &
 	xl console $(DOMAIN_ID)
