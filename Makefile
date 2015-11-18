@@ -27,6 +27,7 @@ start: bin/crust create_domain
 	echo "Starting console - use C-] to exit"
 	xl console $(DOMAIN_ID)
 	-xl destroy $(DOMAIN_ID)
+	-kill -9 `jobs -ps`
 
 debug:
 	gdb -ex "target remote localhost:$(PORT)"
