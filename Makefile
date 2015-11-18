@@ -20,8 +20,8 @@ clean:
 	-rm -rf bin
 
 # Not an actual goal, just useful as a dependency
-DOMAIN_ID=$(shell xl domid $(DOMAIN_NAME) 2> /dev/null)
-ifndef DOMAIN_ID
+DOMAIN_ID:=$(shell xl domid $(DOMAIN_NAME) 2> /dev/null)
+ifdef DOMAIN_ID
 domain_running: xl_create
 	$(eval DOMAIN_ID=$(shell xl domid $(DOMAIN_NAME) 2> /dev/null))
 else
