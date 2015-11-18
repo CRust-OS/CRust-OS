@@ -34,6 +34,7 @@ xl_create: bin/crust
 xl_console: domain_running
 	@echo Starting console - use C-] to exit
 	xl console $(DOMAIN_ID)
+	xl destroy $(DOMAIN_ID)
 
 xl_destroy:
 ifdef DOMAIN_ID
