@@ -20,9 +20,9 @@ clean:
 start: bin/crust
 	xl create -p crust.cfg 'name="$(DOMAIN_NAME)"'
 	$(eval DOMAIN_ID=$(shell xl domid $(DOMAIN_NAME)))
-	gdbsx -a $$DOMAIN_ID 64 $(PORT) > /dev/null &
-	xl console $$DOMAIN_ID
-	-xl destroy $$DOMAIN_ID
+	gdbsx -a $(DOMAIN_ID) 64 $(PORT) > /dev/null &
+	xl console $(DOMAIN_ID)
+	-xl destroy $(DOMAIN_ID)
 
 debug:
 	gdb -ex "target remote localhost:$(PORT)"
