@@ -5,9 +5,6 @@ SHELL=/bin/bash
 DOMAIN_NAME=Crust-OS
 GDBSX_PORT=9999
 
-#For cases when the domain already exists
-DOMAIN_ID=$(shell xl domid $(DOMAIN_NAME) 2> /dev/null)
-
 bin/crust.gz: bin/crust
 	gzip -f -9 -c $^ > $@
 
@@ -23,8 +20,10 @@ clean:
 	-rm -rf bin
 
 # Not an actual goal, just useful as a dependency
+DOMAIN_ID=$(shell xl domid $(DOMAIN_NAME) 2> /dev/null)
 ifndef DOMAIN_ID
 domain_running: xl_create
+	$(eval DOMAIN_ID=$(shell xl domid $(DOMAIN_NAME) 2> /dev/null))
 else
 domain_running:
 endif
