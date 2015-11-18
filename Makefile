@@ -1,5 +1,7 @@
 .PHONY: clean create start debug
 
+SHELL=/bin/bash
+
 DOMAIN_NAME=Crust-OS
 PORT=9999
 
