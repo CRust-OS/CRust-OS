@@ -18,7 +18,7 @@ clean:
 	-rm -rf bin
 
 start:
-	xl create -p crust.cfg name="$(DOMAIN_NAME)"
+	xl create -p crust.cfg 'name="$(DOMAIN_NAME)"'
 	DOMAIN_ID=`xl domid $(DOMAIN_NAME)"
 	gdbsx -a $$DOMAIN_ID 64 $(PORT) > /dev/null &
 	xl console $$DOMAIN_ID
