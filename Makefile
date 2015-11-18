@@ -24,9 +24,9 @@ clean:
 
 # Not an actual goal, just useful as a dependency
 domain_running:
-	ifndef DOMAIN_ID
-		$(error $(DOMAIN_NAME) is not running)
-	endif
+ifndef DOMAIN_ID
+	$(error $(DOMAIN_NAME) is not running)
+endif
 
 xl_create: bin/crust
 	xl create -p crust.cfg 'name="$(DOMAIN_NAME)"'
