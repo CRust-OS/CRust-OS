@@ -1,9 +1,12 @@
-.PHONY: clean create start debug
+.PHONY: clean xl_create xl_console gdb gdbsx
 
 SHELL=/bin/bash
 
 DOMAIN_NAME=Crust-OS
-PORT=9999
+GDBSX_PORT=9999
+
+#For cases when the domain already exists
+DOMAIN_ID=$(shell xl domid DOMAIN_NAME 2> /dev/null)
 
 bin/crust.gz: bin/crust
 	gzip -f -9 -c $^ > $@
@@ -19,17 +22,21 @@ clean:
 	-rm -rf target
 	-rm -rf bin
 
-#Conceptually a part of the "start" goal, but we need to create the domain before the $(eval DOMAIN_ID=...) gets expanded.
-create_domain: bin/crust
+# Not an actual goal, just useful as a dependency
+domain_running:
+	ifndef DOMAIN_ID
+		$(error $(DOMAIN_NAME) is not running)
+	endif
+
+xl_create: bin/crust
 	xl create -p crust.cfg 'name="$(DOMAIN_NAME)"'
 
-start: bin/crust create_domain
-	$(eval DOMAIN_ID=$(shell xl domid $(DOMAIN_NAME)))
-	gdbsx -a $(DOMAIN_ID) 64 $(PORT) > /dev/null &
+xl_console: domain_running
 	@echo Starting console - use C-] to exit
 	xl console $(DOMAIN_ID)
-	-xl destroy $(DOMAIN_ID)
-	-kill -9 `jobs -ps`
 
-debug:
-	gdb -ex "target remote localhost:$(PORT)"
+gdbsx: domain_running
+	gdbsx -a $(DOMAIN_ID) 64 $(PORT) > /dev/null
+
+gdb:
+	rust-gdb -ex "target remote localhost:$(PORT)"
