@@ -1,4 +1,4 @@
-.PHONY: clean xl_create xl_console xl_destroy gdb gdbsx
+.PHONY: clean domain_running xl_create xl_console xl_destroy gdb gdbsx
 
 SHELL=/bin/bash
 
@@ -20,8 +20,8 @@ clean:
 	-rm -rf bin
 
 # Not an actual goal, just useful as a dependency
-DOMAIN_ID:=$(shell xl domid $(DOMAIN_NAME) 2> /dev/null)
-ifdef DOMAIN_ID
+DOMAIN_ID=$(shell xl domid $(DOMAIN_NAME) 2> /dev/null)
+ifeq ($(DOMAIN_ID),)
 domain_running: xl_create
 	$(eval DOMAIN_ID=$(shell xl domid $(DOMAIN_NAME) 2> /dev/null))
 else
@@ -37,7 +37,7 @@ xl_console: domain_running
 	xl destroy $(DOMAIN_ID)
 
 xl_destroy:
-ifdef DOMAIN_ID
+ifdef ($(DOMAIN_ID),)
 	xl destroy $(DOMAIN_ID)
 else
 	$(error $(DOMAIN_NAME) is not running)
