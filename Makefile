@@ -24,6 +24,7 @@ create_domain: bin/crust
 start: bin/crust create_domain
 	$(eval DOMAIN_ID=$(shell xl domid $(DOMAIN_NAME)))
 	gdbsx -a $(DOMAIN_ID) 64 $(PORT) > /dev/null &
+	echo "Starting console - use C-] to exit"
 	xl console $(DOMAIN_ID)
 	-xl destroy $(DOMAIN_ID)
 
