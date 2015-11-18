@@ -6,7 +6,7 @@ DOMAIN_NAME=Crust-OS
 GDBSX_PORT=9999
 
 #For cases when the domain already exists
-DOMAIN_ID=$(shell xl domid DOMAIN_NAME 2> /dev/null)
+DOMAIN_ID=$(shell xl domid $(DOMAIN_NAME) 2> /dev/null)
 
 bin/crust.gz: bin/crust
 	gzip -f -9 -c $^ > $@
