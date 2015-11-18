@@ -23,9 +23,10 @@ clean:
 	-rm -rf bin
 
 # Not an actual goal, just useful as a dependency
-domain_running:
 ifndef DOMAIN_ID
-	$(error $(DOMAIN_NAME) is not running)
+domain_running: xl_create
+else
+domain_running:
 endif
 
 xl_create: bin/crust
