@@ -1,7 +1,10 @@
 [package]
 name = "crust"
 version = "0.1.0"
-authors = ["Carl Patenaude-Poulin <carl.patenaudepoulin@mail.mcgill.ca>"]
+authors = ["Carl Patenaude-Poulin <carl.patenaudepoulin@mail.mcgill.ca>", "Scott Cooper <scott.cooper2@mail.mcgill.ca"]
 
 [lib]
 crate-type = ["staticlib"]
+
+[dependencies]
+rlibc = "0.1"
