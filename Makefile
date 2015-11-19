@@ -31,6 +31,9 @@ endif
 xl_create: bin/crust
 	xl create -p crust.cfg 'name="$(DOMAIN_NAME)"'
 
+xl_start: domain_running
+	xl unpause $(DOMAIN_ID)
+
 xl_console: domain_running
 	@echo Starting console - use C-] to exit
 	xl console $(DOMAIN_ID)
