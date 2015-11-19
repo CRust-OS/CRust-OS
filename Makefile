@@ -29,19 +29,19 @@ domain_running:
 endif
 
 xl_create: bin/crust
-	xl create -p crust.cfg 'name="$(DOMAIN_NAME)"'
+	sudo xl create -p crust.cfg 'name="$(DOMAIN_NAME)"'
 
 xl_start: domain_running
-	xl unpause $(DOMAIN_ID)
+	sudo xl unpause $(DOMAIN_ID)
 
 xl_console: domain_running
 	@echo Starting console - use C-] to exit
-	xl console $(DOMAIN_ID)
-	xl destroy $(DOMAIN_ID)
+	sudo xl console $(DOMAIN_ID)
+	sudo xl destroy $(DOMAIN_ID)
 
 xl_destroy:
 ifdef ($(DOMAIN_ID),)
-	xl destroy $(DOMAIN_ID)
+	sudo xl destroy $(DOMAIN_ID)
 else
 	$(error $(DOMAIN_NAME) is not running)
 endif
