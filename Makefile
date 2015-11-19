@@ -20,7 +20,7 @@ clean:
 	-rm -rf bin
 
 # Not an actual goal, just useful as a dependency
-DOMAIN_ID=$(shell xl domid $(DOMAIN_NAME) 2> /dev/null)
+DOMAIN_ID=$(shell sudo xl domid $(DOMAIN_NAME) 2> /dev/null)
 ifeq ($(DOMAIN_ID),)
 domain_running: xl_create
 	$(eval DOMAIN_ID=$(shell xl domid $(DOMAIN_NAME) 2> /dev/null))
