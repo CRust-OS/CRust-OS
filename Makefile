@@ -47,7 +47,7 @@ else
 endif
 
 gdbsx: domain_running
-	-gdbsx -a $(DOMAIN_ID) 64 $(GDBSX_PORT)
+	-sudo gdbsx -a $(DOMAIN_ID) 64 $(GDBSX_PORT)
 
 gdb:
 	rust-gdb -ex "target remote localhost:$(GDBSX_PORT)"
