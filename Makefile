@@ -23,7 +23,7 @@ clean:
 DOMAIN_ID=$(shell sudo xl domid $(DOMAIN_NAME) 2> /dev/null)
 ifeq ($(DOMAIN_ID),)
 domain_running: xl_create
-	$(eval DOMAIN_ID=$(shell xl domid $(DOMAIN_NAME) 2> /dev/null))
+	$(eval DOMAIN_ID=$(shell sudo xl domid $(DOMAIN_NAME) 2> /dev/null))
 else
 domain_running:
 endif
