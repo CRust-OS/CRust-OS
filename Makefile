@@ -10,7 +10,7 @@ DEPS = deps
 
 RM = rm -rf
 MKDIR = @mkdir -p
-WGET = wget --non-verbose
+WGET = wget --no-verbose
 
 .PHONY: all
 all: $(BIN)/crust.gz
