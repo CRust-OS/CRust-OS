@@ -1,53 +1,28 @@
-.PHONY: clean domain_running xl_create xl_console xl_destroy gdb gdbsx
+PROFILE ?= DEBUG
+TARGET ?= x86_64-unknown-none-gnu
 
-SHELL=/bin/bash
+OBJ = obj
+BIN = bin
+SRC = src
+LIB = lib
+TMP = tmp
+DEPS = deps
 
-DOMAIN_NAME=Crust-OS
-GDBSX_PORT=9999
+RM = rm -rf
+MKDIR = @mkdir -p
+WGET = wget --non-verbose
 
-bin/crust.gz: bin/crust
-	gzip -f -9 -c $^ > $@
+.PHONY: all
+all: $(BIN)/crust.gz
 
-bin/crust: crust.lds target/debug/libcrust.a src/arch/*.S
-	mkdir -p `dirname $@`
-	gcc -nostdlib -o bin/crust -T crust.lds src/arch/*.S target/debug/libcrust.a
+# Order-sensitive
+include build/Utils.mk
+include build/Rust.mk
+include build/Assembler.mk
+include build/Linking.mk
+include build/libcore.mk
 
-target/%/libcrust.a: Cargo.toml Cargo.lock src/*.rs
-	cargo rustc -- -Z no-landing-pads
-
+GENERATED = $(BIN) $(OBJ) $(TMP) $(DEPS) $(LIB)
+.PHONY: clean
 clean:
-	-rm -rf target
-	-rm -rf bin
-
-# Not an actual goal, just useful as a dependency
-DOMAIN_ID=$(shell sudo xl domid $(DOMAIN_NAME) 2> /dev/null)
-ifeq ($(DOMAIN_ID),)
-domain_running: xl_create
-	$(eval DOMAIN_ID=$(shell sudo xl domid $(DOMAIN_NAME) 2> /dev/null))
-else
-domain_running:
-endif
-
-xl_create: bin/crust
-	sudo xl create -p crust.cfg 'name="$(DOMAIN_NAME)"'
-
-xl_start: domain_running
-	sudo xl unpause $(DOMAIN_ID)
-
-xl_console: domain_running
-	@echo Starting console - use C-] to exit
-	sudo xl console $(DOMAIN_ID)
-	sudo xl destroy $(DOMAIN_ID)
-
-xl_destroy:
-ifdef ($(DOMAIN_ID),)
-	sudo xl destroy $(DOMAIN_ID)
-else
-	$(error $(DOMAIN_NAME) is not running)
-endif
-
-gdbsx: domain_running
-	-sudo gdbsx -a $(DOMAIN_ID) 64 $(GDBSX_PORT)
-
-gdb:
-	rust-gdb -ex "target remote localhost:$(GDBSX_PORT)"
+	$(RM) $(GENERATED)
