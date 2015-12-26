@@ -14,6 +14,7 @@ $(ASM_TMP)/%.s: $(SRC)/%.S
 	$(MKDIR) $(@D)
 	$(CPP) $< $@
 
+.INTERMEDIATE: $(OBJ)/%.o
 $(OBJ)/%.o: $(ASM_TMP)/%.s
 	$(MKDIR) $(@D)
 	$(AS) $(AS_ARGS) -o $@ $<

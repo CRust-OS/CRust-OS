@@ -1,28 +1,36 @@
 PROFILE ?= DEBUG
-TARGET ?= x86_64-unknown-none-gnu
+TARGET_TRIPLE ?= x86_64-unknown-none-gnu
 
+# Source folders
+SRC = src
+BUILD = build
+
+# Generated folders
 OBJ = obj
 BIN = bin
-SRC = src
 LIB = lib
 TMP = tmp
 DEPS = deps
+DIRTY += $(OBJ) $(BIN) $(LIB) $(TMP) $(DEPS)
 
+# Commands
 RM = rm -rf
 MKDIR = @mkdir -p
 WGET = wget --no-verbose
+ECHO = @echo
+
+.SECONDARY:
 
 .PHONY: all
 all: $(BIN)/crust.gz
 
-# Order-sensitive
-include build/Utils.mk
-include build/Rust.mk
-include build/Assembler.mk
-include build/Linking.mk
-include build/libcore.mk
+# Modules (include is order-sensitive)
+include $(BUILD)/Utils.mk
+include $(BUILD)/Rust.mk
+include $(BUILD)/Assembler.mk
+include $(BUILD)/Linking.mk
+include $(BUILD)/libcore.mk
 
-GENERATED = $(BIN) $(OBJ) $(TMP) $(DEPS) $(LIB)
 .PHONY: clean
 clean:
-	$(RM) $(GENERATED)
+	$(RM) $(DIRTY)

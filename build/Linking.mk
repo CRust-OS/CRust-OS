@@ -15,7 +15,7 @@ $(DEPS)/$(BIN)/crust.d: $(ASM_FILES)
 
 $(BIN)/crust: $(LD_DEPS) $(OBJ)/libcrust.a
 	$(MKDIR) $(@D)
-	$(LD) $(LD_ARGS) -o $@  $(OBJ_FILES) -l crust
+	$(LD) $(LD_ARGS) -o $@ $(OBJ_FILES) $(OBJ)/libcrust.a
 
 $(BIN)/crust.gz: $(BIN)/crust
 	gzip -f -9 -c $< > $@
