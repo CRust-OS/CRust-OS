@@ -12,11 +12,11 @@ SECTIONS {
         *(.bss);
         *(.bss.*);
     } = 0xCC 
-    .text : ALIGN(0x1000) {
+    .text : {
         *(.text);
         *(.text.*);
     } = 0xCC
-    .data : ALIGN(0x1000) {
+    .data : {
         *(.data);
         *(.data.*);
     } = 0xCC
