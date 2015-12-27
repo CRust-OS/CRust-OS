@@ -1,8 +1,8 @@
 ifeq ($(PROFILE), DEBUG)
-	AS_ARGS += -g
+AS_ARGS += -g
 else ifeq ($(PROFILE), RELEASE)
 else
-	$(error unrecognized PROFILE value $(PROFILE))
+$(error unrecognized PROFILE value $(PROFILE))
 endif
 
 CPP = cpp
@@ -14,7 +14,6 @@ $(ASM_TMP)/%.s: $(SRC)/%.S
 	$(MKDIR) $(@D)
 	$(CPP) $< $@
 
-.INTERMEDIATE: $(OBJ)/%.o
 $(OBJ)/%.o: $(ASM_TMP)/%.s
 	$(MKDIR) $(@D)
 	$(AS) $(AS_ARGS) -o $@ $<

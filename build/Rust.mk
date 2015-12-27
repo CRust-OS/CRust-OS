@@ -1,10 +1,10 @@
 ifeq ($(PROFILE), DEBUG)
-	TARGET = target/$(TARGET_TRIPLE)/debug
+TARGET = target/$(TARGET_TRIPLE)/debug
 else ifeq ($(PROFILE), RELEASE)
-	TARGET = target/$(TARGET_TRIPLE)/release
-	CARGO_ARGS += --release
+TARGET = target/$(TARGET_TRIPLE)/release
+CARGO_ARGS += --release
 else
-	$(error unrecognized PROFILE value $(PROFILE))
+$(error unrecognized PROFILE value $(PROFILE))
 endif
 
 DIRTY += $(TARGET)
