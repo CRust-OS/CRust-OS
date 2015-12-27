@@ -20,7 +20,7 @@ $(DEPS)/$(TARGET)/libcrust.a.d: $(RUST_FILES)
 
 $(TARGET)/libcrust.a: $(CARGO_DEPS)
 	$(MKDIR) $(@D)
-	$(warning if the following fails with "error: can't find crate for `core`", you need to `make lib/libcore.rlib` and put it in your rust toolchain directory under lib/rustlib/$(TARGET_TRIPLE)/lib.)
+	$(warning if the following fails with "error: can't find crate for `core`" or "the crate `core` has been compiled with ...", you need to `make lib/libcore.rlib` and put it in your rust toolchain directory under lib/rustlib/$(TARGET_TRIPLE)/lib.)
 	$(CARGO) build $(CARGO_ARGS)
 
 $(OBJ)/libcrust.a: $(TARGET)/libcrust.a
