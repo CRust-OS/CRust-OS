@@ -50,8 +50,6 @@ gdbsx_stop:
 .PHONY: gdb
 gdb: gdbsx_start
 	$(ECHO) GDBSX_PID=$(GDBSX_PID)
-	pgrep --list-full gdbsx
 	gdb -ex "target remote localhost:$(GDBSX_PROC_PORT)"
-	pgrep --list-full gdbsx
 
 clean: $(if $(DOM_ID),gdbsx_stop)
