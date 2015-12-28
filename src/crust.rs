@@ -16,8 +16,6 @@ mod sharedinfo;
 #[no_mangle]
 pub extern fn main(_x : *const startinfo::start_info) {
     hypercalls::console_io::write(b"Hello world!\n\0");
-    //hypercalls::sched_op::block();
-    loop {}
 }
 
 //extern  {
