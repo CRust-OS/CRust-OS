@@ -3,6 +3,7 @@
 #![feature(asm)]
 #![feature(core_str_ext)]
 #![feature(ptr_as_ref)]
+#![feature(type_macros)]
 #![no_std]
 #![allow(dead_code)]     // XXX: For now, because a lot of unused structs
 extern crate rlibc;
@@ -18,9 +19,8 @@ mod console;
 
 #[no_mangle]
 pub extern fn main(x : *const startinfo::start_info) {
-    // hypercalls::say_hello();
-    hypercalls::block();
-    while true {}
+    hypercalls::sched_op::block();
+    loop {}
 }
 
 
