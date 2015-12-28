@@ -8,7 +8,6 @@
 extern crate rlibc;
 
 pub mod shims;
-#[macro_use]
 pub mod hypercalls;
 mod startinfo;
 mod sharedinfo;
