@@ -11,7 +11,6 @@ extern crate rlibc;
 pub mod shims;
 #[macro_use]
 pub mod hypercalls;
-pub mod events;
 mod startinfo;
 mod sharedinfo;
 mod console;
