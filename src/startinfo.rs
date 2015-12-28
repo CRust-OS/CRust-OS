@@ -1,3 +1,4 @@
+#[allow(non_snake_case)]
 #[repr(C)]
 pub struct start_info {
     magic:              [u8; 32],
