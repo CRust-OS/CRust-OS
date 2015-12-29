@@ -3,6 +3,7 @@ AS_ARGS += -g
 CPP = cpp
 AS = as
 AR = ar
+LD = ld
 
 $(OBJ)/%.s: $(BOOT)/%.S
 	$(MKDIR) $(@D)
@@ -14,13 +15,12 @@ $(OBJ)/%.o: $(OBJ)/%.s
 
 ASM_FILES = $(shell find $(BOOT) -name "*.S")
 OBJ_FILES = $(patsubst $(BOOT)/%.S,$(OBJ)/%.o,$(ASM_FILES))
-$(DEPS)/$(BIN)/boot.a.d: $(ASM_FILES)
+$(DEPS)/$(BIN)/boot.o.d: $(ASM_FILES)
 	$(MKDIR) $(@D)
-	$(ECHO) "$(BIN)/boot.a: $(OBJ_FILES)" > $@
--include $(DEPS)/$(BIN)/boot.a.d
+	$(ECHO) "$(BIN)/boot.o: $(OBJ_FILES)" > $@
+-include $(DEPS)/$(BIN)/boot.o.d
 
-$(BIN)/boot.a:
+$(BIN)/boot.o:
 	$(MKDIR) $(@D)
-	$(ECHO) Assembling $(ASM_FILES)...
 	$(ECHO) Bundling $(OBJ_FILES)...
-	$(AR) rcs $@ $^
+	$(LD) --relocatable -o $@ $(OBJ_FILES)

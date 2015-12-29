@@ -21,7 +21,6 @@ SECTIONS {
         *(.data.*);
     } = 0xCC
     .note : {
-        *(.note);
-        *(.note.*);
+        *(.note.Xen);
     }
 }
