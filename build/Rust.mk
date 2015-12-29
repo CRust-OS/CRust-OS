@@ -1,13 +1,4 @@
-ifeq ($(PROFILE), DEBUG)
-TARGET = target/$(TARGET_TRIPLE)/debug
-else ifeq ($(PROFILE), RELEASE)
-TARGET = target/$(TARGET_TRIPLE)/release
-CARGO_ARGS += --release
-else
-$(error unrecognized PROFILE value $(PROFILE))
-endif
-
-DIRTY += $(TARGET)
+#CARGO_ARGS += --release
 
 CARGO = cargo
 CARGO_ARGS += --target $(TARGET_TRIPLE)
@@ -20,9 +11,12 @@ $(DEPS)/$(TARGET)/libcrust.a.d: $(RUST_FILES)
 
 $(TARGET)/libcrust.a: $(CARGO_DEPS)
 	$(MKDIR) $(@D)
+	$(ECHO) Building $^...
 	$(warning if the following fails with "error: can't find crate for `core`" or "the crate `core` has been compiled with ...", you need to `make lib/libcore.rlib` and put it in your rust toolchain directory under lib/rustlib/$(TARGET_TRIPLE)/lib.)
 	$(CARGO) build $(CARGO_ARGS)
+	# Cargo doesn't always update timestamp
+	[ -e $@ ] && touch $@ 
 
-$(OBJ)/libcrust.a: $(TARGET)/libcrust.a
+$(BIN)/libcrust.a: $(TARGET)/libcrust.a
 	$(MKDIR) $(@D)
 	cp $< $@
