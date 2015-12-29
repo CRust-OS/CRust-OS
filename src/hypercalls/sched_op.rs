@@ -1,3 +1,5 @@
+use hypercalls::Hypercall;
+
 #[allow(non_camel_case_types)]
 enum Command {
     _yield          = 0,
@@ -10,5 +12,23 @@ enum Command {
 }
 
 pub fn block() {
-    hypercall!(i64, Command::block);
+    hypercall!(i64, Hypercall::sched_op, Command::block);
+}
+
+#[allow(non_camel_case_types)]
+pub enum ShutdownReason {
+    poweroff    = 0,
+    reboot      = 1,
+    suspend     = 2,
+    crash       = 3,
+    watchdog    = 4
+}
+
+struct Shutdown {
+    reason: ShutdownReason
+}
+
+pub fn shutdown(reason : ShutdownReason) -> ! {
+    hypercall!(i64, Hypercall::sched_op, Command::shutdown, &(Shutdown { reason: reason }) as *const Shutdown);
+    loop {} // unreachable
 }
