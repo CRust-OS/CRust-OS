@@ -11,7 +11,11 @@ enum Command {
     watchdog        = 6
 }
 
-pub fn block() {
+pub unsafe fn _yield() {
+    hypercall!(i64, Hypercall::sched_op, Command::_yield);
+}
+
+pub unsafe fn block() {
     hypercall!(i64, Hypercall::sched_op, Command::block);
 }
 
@@ -24,11 +28,11 @@ pub enum ShutdownReason {
     watchdog    = 4
 }
 
-struct Shutdown {
-    reason: ShutdownReason
+pub struct Shutdown {
+    pub reason: ShutdownReason
 }
 
-pub fn shutdown(reason : ShutdownReason) -> ! {
-    hypercall!(i64, Hypercall::sched_op, Command::shutdown, &(Shutdown { reason: reason }) as *const Shutdown);
+pub unsafe fn shutdown(args: *const Shutdown) -> ! {
+    hypercall!(i64, Hypercall::sched_op, Command::shutdown, args);
     loop {} // unreachable
 }

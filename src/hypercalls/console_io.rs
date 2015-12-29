@@ -6,6 +6,6 @@ enum Command {
     read  = 1
 }
 
-pub fn write(s : &[u8]) {
+pub unsafe fn write(s : &[u8]) {
     hypercall!(i64, Hypercall::console_io, Command::write, s.len(), s.as_ptr());
 }

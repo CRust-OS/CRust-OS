@@ -19,8 +19,10 @@ unsafe fn crash() -> ! {
 
 #[lang = "panic_fmt"]
 fn panic_fmt() -> ! {
-    hypercalls::console_io::write(b"Panic!\n\0");
-    hypercalls::sched_op::shutdown(hypercalls::sched_op::ShutdownReason::crash)
+    unsafe {
+        hypercalls::console_io::write(b"Panic!\n\0");
+        hypercalls::sched_op::shutdown(&(hypercalls::sched_op::Shutdown { reason: hypercalls::sched_op::ShutdownReason::crash}) as *const hypercalls::sched_op::Shutdown)
+    }
 }
 
 mod startinfo;
@@ -28,11 +30,8 @@ mod sharedinfo;
 
 #[no_mangle]
 pub extern fn main(_x : *const startinfo::start_info) {
-    //panic!();
-    hypercalls::console_io::write(b"Hello world!\n");
-    hypercalls::sched_op::shutdown(hypercalls::sched_op::ShutdownReason::poweroff);
+    unsafe {
+        hypercalls::console_io::write(b"Hello world!\n");
+        hypercalls::sched_op::shutdown(&(hypercalls::sched_op::Shutdown { reason: hypercalls::sched_op::ShutdownReason::poweroff}) as *const hypercalls::sched_op::Shutdown);
+    }
 }
-
-//extern  {
-    //pub static HYPERVISOR_start_info : startinfo::shared_info;
-//}
