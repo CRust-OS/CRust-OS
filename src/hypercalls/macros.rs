@@ -4,6 +4,7 @@ macro_rules! hypercall {
     // http://stackoverflow.com/questions/2535989/what-are-the-calling-conventions-for-unix-linux-system-calls-on-x86-64
     // This implementation based on the Mini-OS implementation of _hypercall0, _hypercall1, etc.
     ($ty : ty, $op : expr) => {
+        #[allow(unused_unsafe)] //https://github.com/rust-lang/rust/issues/8472
         unsafe { 
             let result : i64;
             asm!("call HYPERCALL_PAGE + ${1:c}"
@@ -16,6 +17,7 @@ macro_rules! hypercall {
         }
     };
     ($ty : ty, $op : expr, $a1 : expr) => {
+        #[allow(unused_unsafe)] //https://github.com/rust-lang/rust/issues/8472
         unsafe { 
             let result : i64;
             let __ign1 : i64;
@@ -31,6 +33,7 @@ macro_rules! hypercall {
         }
     };
     ($ty : ty, $op : expr, $a1 : expr, $a2 : expr) => {
+        #[allow(unused_unsafe)] //https://github.com/rust-lang/rust/issues/8472
         unsafe { 
             let result : i64;
             let __ign1 : i64;
@@ -47,6 +50,7 @@ macro_rules! hypercall {
         }
     };
     ($ty : ty, $op : expr, $a1 : expr, $a2 : expr, $a3 : expr) => {
+        #[allow(unused_unsafe)] //https://github.com/rust-lang/rust/issues/8472
         unsafe { 
             let result : i64;
             let __ign1 : i64;
@@ -64,6 +68,7 @@ macro_rules! hypercall {
         }
     };
     ($ty : ty, $op : expr, $a1 : expr, $a2 : expr, $a3 : expr, $a4 : expr) => {
+        #[allow(unused_unsafe)] //https://github.com/rust-lang/rust/issues/8472
         unsafe { 
             let result : i64;
             let __ign1 : i64;
@@ -82,6 +87,7 @@ macro_rules! hypercall {
         }
     };
     ($ty : ty, $op : expr, $a1 : expr, $a2 : expr, $a3 : expr, $a4 : expr) => {
+        #[allow(unused_unsafe)] //https://github.com/rust-lang/rust/issues/8472
         unsafe { 
             let result : i64;
             let __ign1 : i64;
