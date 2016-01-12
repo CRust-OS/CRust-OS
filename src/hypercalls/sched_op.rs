@@ -1,7 +1,7 @@
-use hypercalls::Hypercall;
+use hypercalls::Command;
 
 #[allow(non_camel_case_types)]
-enum Command {
+enum SubCommand {
     _yield          = 0,
     block           = 1,
     shutdown        = 2,
@@ -12,11 +12,11 @@ enum Command {
 }
 
 pub unsafe fn _yield() {
-    hypercall!(i64, Hypercall::sched_op, Command::_yield);
+    hypercall!(i64, Command::sched_op, SubCommand::_yield);
 }
 
 pub unsafe fn block() {
-    hypercall!(i64, Hypercall::sched_op, Command::block);
+    hypercall!(i64, Command::sched_op, SubCommand::block);
 }
 
 #[allow(non_camel_case_types)]
@@ -33,6 +33,6 @@ pub struct Shutdown {
 }
 
 pub unsafe fn shutdown(args: *const Shutdown) -> ! {
-    hypercall!(i64, Hypercall::sched_op, Command::shutdown, args);
+    hypercall!(i64, Command::sched_op, SubCommand::shutdown, args);
     loop {} // unreachable
 }

@@ -1,5 +1,5 @@
 #[allow(non_camel_case_types)]
-enum Hypercall {
+enum Command {
     set_trap_table      = 0,
     mmu_update          = 1,
     set_gdt             = 2,
