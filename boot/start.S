@@ -8,6 +8,11 @@
 _start:
     mov $STACK_BOTTOM, %rbp
     mov %rbp, %rsp
-    movq start_info_addr, arg1 
+    mov start_info_addr, start_info
     call main
     hlt    
+
+.bss
+
+start_info:
+    .quad 0

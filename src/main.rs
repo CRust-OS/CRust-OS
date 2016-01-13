@@ -3,11 +3,12 @@
 #![feature(stmt_expr_attributes)]
 #![feature(type_macros)]
 #![feature(associated_consts)]
+#![feature(braced_empty_structs)] // XXX: For now
+#![feature(start)]
 //#![feature(core_str_ext)]
 //#![feature(ptr_as_ref)]
 #![no_std]
 #![allow(dead_code)]              // XXX: For now, because a lot of unused structs
-#![feature(braced_empty_structs)] // XXX: For now
 extern crate rlibc;
 
 pub mod xen;
@@ -24,11 +25,15 @@ fn panic_fmt() -> ! {
     }
 }
 
+extern {
+    static start_info: *const startinfo::start_info;
+}
+
 mod startinfo;
 mod sharedinfo;
 
-#[no_mangle]
-pub extern fn main(_x : *const startinfo::start_info) {
+#[start]
+pub fn main(_argc: isize, _argv: *const *const u8) -> isize {
     unsafe {
         hypercalls::console_io::write(b"Hello world!\n");
         hypercalls::sched_op::shutdown(&(hypercalls::sched_op::Shutdown { reason: hypercalls::sched_op::ShutdownReason::poweroff}) as *const hypercalls::sched_op::Shutdown);
