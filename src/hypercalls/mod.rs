@@ -72,7 +72,7 @@ mod macros;
 //pub mod xen_version;
 pub mod console_io;
 //pub mod physdev_op_compat;
-//pub mod grant_table_op;
+pub mod grant_table_op;
 //pub mod vm_assist;
 //pub mod update_va_mapping_otherdomain;
 //pub mod iret;

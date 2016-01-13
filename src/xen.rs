@@ -15,3 +15,5 @@ impl DomID {
 #[repr(C)]
 #[derive(Clone, Copy)]
 pub struct Vcpu(u32);
+
+pub type PFN = u64;
