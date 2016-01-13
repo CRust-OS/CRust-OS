@@ -18,9 +18,10 @@ pub mod hypercalls;
 extern fn eh_personality() {}
 
 #[lang = "panic_fmt"]
-fn panic_fmt() -> ! {
+#[no_mangle]
+pub extern fn rust_begin_unwind(_fmt: core::fmt::Arguments, _file_line: &(&'static str, u32)) -> ! {
     unsafe {
-        hypercalls::console_io::write(b"Panic!\n\0");
+        hypercalls::console_io::write(b"panic_fmt!\n\0");
         hypercalls::sched_op::shutdown(&(hypercalls::sched_op::Shutdown { reason: hypercalls::sched_op::ShutdownReason::crash}) as *const hypercalls::sched_op::Shutdown)
     }
 }
