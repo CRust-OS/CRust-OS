@@ -14,7 +14,7 @@ DOM_RUNNING = $(DOM)
 
 .PHONY: dom_create
 dom_create: $(TARGET)/crust crust.cfg var_DOMAIN_NAME
-	$(if $(DOM_RUNNING),,$(XL) create -p crust.cfg name=\"$(DOMAIN_NAME)\" kernel=\"$(BIN)/crust\")
+	$(if $(DOM_RUNNING),,$(XL) create -p crust.cfg 'name="$(DOMAIN_NAME)"' 'kernel="$(TARGET)/crust"')
 
 .PHONY: dom_destroy
 dom_destroy: var_DOMAIN_NAME
