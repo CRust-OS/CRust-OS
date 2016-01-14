@@ -21,14 +21,14 @@ enum SubCommand {
 struct Port(u32);
 pub struct EventChannel(Port);
 
-//pub mod bind_interdomain;
+pub mod bind_interdomain;
 pub mod bind_virq;
 pub mod bind_pirq;
 pub mod close;
 //pub mod send;
 //pub mod status;
 //pub mod alloc_unbound;
-//pub mod bind_ipi;
+pub mod bind_ipi;
 //pub mod bind_vcpu;
 //pub mod unmask;
 //pub mod reset;

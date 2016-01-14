@@ -1,4 +1,4 @@
-use xen::*;
+use xen::Vcpu;
 use hypercalls::Command;
 use hypercalls::event_channel_op::SubCommand;
 use hypercalls::event_channel_op::EventChannel;
