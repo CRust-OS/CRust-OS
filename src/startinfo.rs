@@ -1,7 +1,7 @@
 #[allow(non_snake_case)]
 #[repr(C)]
 pub struct start_info {
-    magic:              [u8; 32],
+    pub magic:          [u8; 32],
     nr_pages:           u64,
     shared_info:        u64,
     flags:              u32,

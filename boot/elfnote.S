@@ -13,7 +13,7 @@
     .popsection
 
 /* Guest name and version */
-XEN_ELFNOTE(XEN_ELFNOTE_GUEST_OS, .asciz "CRustOS")
+XEN_ELFNOTE(XEN_ELFNOTE_GUEST_OS, .asciz "Crust")
 XEN_ELFNOTE(XEN_ELFNOTE_GUEST_VERSION, .asciz "0.1")
 
 /* PV loader */

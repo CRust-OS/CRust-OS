@@ -14,8 +14,8 @@ TMP = tmp
 DIRTY += $(TMP)
 DEPS = deps
 DIRTY += $(DEPS)
+# Cleaned by Cargo
 TARGET = target/$(TARGET_TRIPLE)/$(PROFILE)
-DIRTY += $(TARGET)
 
 # Commands
 RM = rm -rf
