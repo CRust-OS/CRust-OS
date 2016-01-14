@@ -15,6 +15,10 @@ pub enum SubCommand {
     cache_flush = 12
 }
 
+#[repr(C)]
+#[derive(Clone, Copy)]
+pub struct PFN(pub u64);
+
 //pub mod map_grant_ref;
 //pub mod unmap_grant ref;
 pub mod setup_table;

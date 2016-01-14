@@ -1,3 +1,7 @@
+extern {
+    static start_info_page: *const start_info;
+}
+
 #[allow(non_snake_case)]
 #[repr(C)]
 pub struct start_info {
