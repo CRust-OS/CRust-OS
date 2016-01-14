@@ -1,7 +1,6 @@
 use core::mem;
-use ::xen::hypercalls::{Command, DomID};
-use ::xen::hypercalls::grant_table_op::{SubCommand, PFN};
-use ::xen::hypercalls::grant_table_op::setup_table::Args;
+use ::xen::hypercalls::*;
+use ::xen::hypercalls::grant_table_op::*;
 
 const NR_RESERVED_ENTRIES   : u32 = 8;
 const NR_GRANT_FRAMES       : u32 = 1;
@@ -9,7 +8,7 @@ const NR_GRANT_FRAMES       : u32 = 1;
 pub unsafe fn arch_init_gnttab(nr_grant_frames : u32) {
     // TODO: FIX
     let frames = [0u64; 16];
-    let mut args = Args {
+    let mut args = setup_table::Args {
         dom: DomID::SELF,
         nr_frames: nr_grant_frames,
         status: mem::zeroed(),
@@ -19,7 +18,7 @@ pub unsafe fn arch_init_gnttab(nr_grant_frames : u32) {
         i64,
         Command::grant_table_op,
         SubCommand::setup_table,
-        &mut args as *mut Args,
+        &mut args as *mut setup_table::Args,
         1u32            // number of arguments: 1
     );
 
