@@ -16,9 +16,7 @@ enum SubCommand {
     set_priority        = 13
 }
 
-// Port implements Drop, which is incompatible with repr(C)
-// https://github.com/rust-lang/rust/issues/24585
-// Use _Port when interfacing with the hypervisor
+#[repr(C)]
 #[derive(Copy, Clone)]
 struct Port(u32);
 pub struct EventChannel(Port);
