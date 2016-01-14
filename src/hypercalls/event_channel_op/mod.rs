@@ -19,9 +19,9 @@ enum SubCommand {
 // Port implements Drop, which is incompatible with repr(C)
 // https://github.com/rust-lang/rust/issues/24585
 // Use _Port when interfacing with the hypervisor
-#[repr(C)]
-struct _Port(u32);
-pub struct Port(_Port);
+#[derive(Copy, Clone)]
+struct Port(u32);
+pub struct EventChannel(Port);
 
 //pub mod bind_interdomain;
 pub mod bind_virq;

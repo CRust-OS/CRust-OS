@@ -2,10 +2,10 @@ use core::mem;
 use xen::*;
 use hypercalls::Command;
 use hypercalls::event_channel_op::SubCommand;
+use hypercalls::event_channel_op::EventChannel;
 use hypercalls::event_channel_op::Port;
-use hypercalls::event_channel_op::_Port;
 
-pub unsafe fn call(virq: Virq, vcpu: Vcpu) -> Port {
+pub unsafe fn call(virq: Virq, vcpu: Vcpu) -> EventChannel {
     let port = mem::uninitialized();
     let mut args = Args { virq: virq, vcpu: vcpu, port: port };
     let _result = hypercall!(
@@ -14,7 +14,7 @@ pub unsafe fn call(virq: Virq, vcpu: Vcpu) -> Port {
         SubCommand::bind_virq,
         &mut args as *mut Args
     );
-    Port(args.port)
+    EventChannel(args.port)
 }
 
 #[repr(C)]
@@ -22,7 +22,7 @@ struct Args {
     virq: Virq,
     vcpu: Vcpu,
     /// Output
-    port: _Port
+    port: Port
 }
 
 #[repr(C)]
