@@ -10,6 +10,9 @@
 #![feature(braced_empty_structs)] // XXX: For now
 extern crate rlibc;
 
+#[macro_use]
+extern crate bitflags;
+
 pub mod xen;
 pub mod hypercalls;
 

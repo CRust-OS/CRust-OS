@@ -23,7 +23,7 @@ pub struct EventChannel(Port);
 
 //pub mod bind_interdomain;
 pub mod bind_virq;
-//pub mod bind_pirq;
+pub mod bind_pirq;
 pub mod close;
 //pub mod send;
 //pub mod status;
