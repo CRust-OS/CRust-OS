@@ -3,6 +3,7 @@
 #![feature(stmt_expr_attributes)]
 #![feature(type_macros)]
 #![feature(associated_consts)]
+#![feature(allocator)]
 //#![feature(core_str_ext)]
 //#![feature(ptr_as_ref)]
 #![no_std]
@@ -12,6 +13,7 @@ extern crate rlibc;
 
 pub mod xen;
 pub mod hypercalls;
+pub mod mm;
 
 #[lang = "eh_personality"]
 extern fn eh_personality() {}
@@ -29,6 +31,7 @@ mod sharedinfo;
 
 #[no_mangle]
 pub extern fn main(_x : *const startinfo::start_info) {
+    mm::setup();
     unsafe {
         hypercalls::console_io::write(b"Hello world!\n");
         hypercalls::sched_op::shutdown(&(hypercalls::sched_op::Shutdown { reason: hypercalls::sched_op::ShutdownReason::poweroff}) as *const hypercalls::sched_op::Shutdown);
