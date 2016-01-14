@@ -1,4 +1,3 @@
-use core::mem;
 use xen::*;
 use hypercalls::Command;
 use hypercalls::event_channel_op::SubCommand;
@@ -6,8 +5,7 @@ use hypercalls::event_channel_op::EventChannel;
 use hypercalls::event_channel_op::Port;
 
 pub unsafe fn call(virq: Virq, vcpu: Vcpu) -> EventChannel {
-    let port = mem::uninitialized();
-    let mut args = Args { virq: virq, vcpu: vcpu, port: port };
+    let mut args = Args { virq: virq, vcpu: vcpu, port: Port(0) };
     let _result = hypercall!(
         i64,
         Command::event_channel_op,
