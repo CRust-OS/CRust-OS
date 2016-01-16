@@ -32,6 +32,26 @@ mod sharedinfo;
 #[no_mangle]
 pub extern fn main(_x : *const startinfo::start_info) {
     mm::setup();
+    let x = mm::__rust_allocate(1, 16);
+    let y = mm::__rust_allocate(1, 16);
+    unsafe {
+        *x = 100;
+        *y = 2 * *x;
+        if *x == 100 && *y == 200 {
+            hypercalls::console_io::write(b"Assigned Properly!\n\0");
+        }
+        else {
+            hypercalls::console_io::write(b"Error Assigning\n\0");
+        }
+
+        if (y as usize - x as usize) == 16 {
+            hypercalls::console_io::write(b"Alligned Properly\n\0");
+        }
+        else {
+            hypercalls::console_io::write(b"Error Alligning\n\0");
+        }
+    }
+
     unsafe {
         hypercalls::console_io::write(b"Hello world!\n");
         hypercalls::sched_op::shutdown(&(hypercalls::sched_op::Shutdown { reason: hypercalls::sched_op::ShutdownReason::poweroff}) as *const hypercalls::sched_op::Shutdown);

@@ -2,18 +2,18 @@
 
 #![allocator]
 
-//use super::hypercalls::console_io::write;
+use super::hypercalls::console_io::write;
 
 static mut heap_end : *mut u8 = 0 as *mut u8;
 
 extern {
-    static HEAP : *mut u8;
+    static HEAP : *const u8;
 }
 
 ///! Set `heap_end` to the starting location of the heap
 pub fn setup() {
     unsafe {
-        heap_end = HEAP;
+        *heap_end = *HEAP;
     }
 }
 
@@ -22,9 +22,8 @@ pub fn setup() {
 ///! Currently, the pointer can't be freed
 pub extern fn __rust_allocate(size: usize, _align: usize) -> *mut u8 {
     unsafe {
-        let ret = heap_end;
-        heap_end = ((heap_end as usize) - size) as *mut u8;
-        ret
+        heap_end = ((heap_end as usize) + size + (_align - size % _align)) as *mut u8;
+        heap_end
     }
 }
 
