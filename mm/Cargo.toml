@@ -1,0 +1,10 @@
+[package]
+name = "mm"
+version = "0.0.1"
+authors = ["Jit Kanetkar <satyajit.kanetkar@mail.mcgill.ca>"]
+
+[lib]
+crate-type = ["rlib"]
+
+[dependencies]
+

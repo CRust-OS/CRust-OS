@@ -1,8 +1,11 @@
 //! Memory Manager for CRust-OS
 
+#![no_std]
+#![feature(allocator)]
+#![feature(lang_items)]
 #![allocator]
 
-use super::hypercalls::console_io::write;
+
 
 static mut heap_end : *mut u8 = 0 as *mut u8;
 

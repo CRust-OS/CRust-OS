@@ -10,10 +10,10 @@
 #![allow(dead_code)]              // XXX: For now, because a lot of unused structs
 #![feature(braced_empty_structs)] // XXX: For now
 extern crate rlibc;
+extern crate mm;
 
 pub mod xen;
 pub mod hypercalls;
-pub mod mm;
 
 #[lang = "eh_personality"]
 extern fn eh_personality() {}
