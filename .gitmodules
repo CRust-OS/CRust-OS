@@ -1,0 +1,3 @@
+[submodule "alloc"]
+	path = alloc
+	url = https://github.com/phil-opp/nightly-liballoc

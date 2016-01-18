@@ -4,6 +4,7 @@
 #![feature(type_macros)]
 #![feature(associated_consts)]
 #![feature(allocator)]
+#![feature(alloc)]
 //#![feature(core_str_ext)]
 //#![feature(ptr_as_ref)]
 #![no_std]
@@ -11,6 +12,7 @@
 #![feature(braced_empty_structs)] // XXX: For now
 extern crate rlibc;
 extern crate mm;
+extern crate alloc;
 
 pub mod xen;
 pub mod hypercalls;
@@ -28,6 +30,8 @@ fn panic_fmt() -> ! {
 
 mod startinfo;
 mod sharedinfo;
+
+use alloc::boxed::Box;
 
 #[no_mangle]
 pub extern fn main(_x : *const startinfo::start_info) {

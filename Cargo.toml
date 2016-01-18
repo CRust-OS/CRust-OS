@@ -11,3 +11,7 @@ rlibc = "0.1"
 
 [dependencies.mm]
 path = "./mm"
+
+[dependencies.alloc]
+path = "./alloc"
+
