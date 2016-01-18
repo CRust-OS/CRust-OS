@@ -1,4 +1,4 @@
-use ::xen::hypercalls::*;
+use ::xen::hypercalls::DomID;
 use ::xen::hypercalls::grant_table_op::PFN;
 
 #[repr(C)]
