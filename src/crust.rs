@@ -55,7 +55,17 @@ pub extern fn main(_x : *const startinfo::start_info) {
             hypercalls::console_io::write(b"Error Alligning\n\0");
         }
     }
-
+    let a = Box::new(5);
+    if *a == 5 {
+        unsafe {
+            hypercalls::console_io::write(b"Box Worked\n\0");
+        }
+    }
+    else {
+        unsafe {
+            hypercalls::console_io::write(b"Box Failed\n\0");
+        }
+    }
     unsafe {
         hypercalls::console_io::write(b"Hello world!\n");
         hypercalls::sched_op::shutdown(&(hypercalls::sched_op::Shutdown { reason: hypercalls::sched_op::ShutdownReason::poweroff}) as *const hypercalls::sched_op::Shutdown);
