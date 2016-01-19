@@ -1,6 +1,6 @@
 use start_info_page;
 use hypercalls::sched_op::block; // TODO: remove
-use hypercalls
+use hypercalls::event_channel_op::{send, EventChannel};
 
 type XENCONS_RING_IDX = u32;
 
@@ -57,6 +57,7 @@ pub unsafe fn write(s : &[u8]) {
     (*intf).out_prod = prod as u32;
 
     // TODO: Notify
+    send::send((*start_info_page).domU.evtchn);
 }
 
 #[inline]

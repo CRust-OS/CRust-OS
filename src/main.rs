@@ -37,7 +37,8 @@ mod sharedinfo;
 #[start]
 pub fn main(_argc: isize, _argv: *const *const u8) -> isize {
     unsafe {
-        hypercalls::console_io::write(b"Hello world!\n\0");
+        hypercalls::console_io::write(b"Hello world!\n");
+        hypercalls::console_io::write(&(*start_info_page).magic);
         hypercalls::sched_op::shutdown(&(hypercalls::sched_op::Shutdown { reason: hypercalls::sched_op::ShutdownReason::poweroff}) as *const hypercalls::sched_op::Shutdown);
     }
 }

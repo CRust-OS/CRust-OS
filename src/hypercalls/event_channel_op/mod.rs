@@ -25,7 +25,7 @@ pub struct EventChannel(Port);
 pub mod bind_virq;
 //pub mod bind_pirq;
 pub mod close;
-//pub mod send;
+pub mod send;
 //pub mod status;
 //pub mod alloc_unbound;
 //pub mod bind_ipi;
