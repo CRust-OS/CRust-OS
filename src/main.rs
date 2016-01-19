@@ -28,7 +28,7 @@ pub extern fn rust_begin_unwind(_fmt: core::fmt::Arguments, _file_line: &(&'stat
 
 
 extern {
-    static start_info_page: *const startinfo::start_info;
+    pub static start_info_page: *const startinfo::start_info;
 }
 
 mod startinfo;
