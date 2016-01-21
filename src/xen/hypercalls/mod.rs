@@ -1,4 +1,5 @@
 #[allow(non_camel_case_types)]
+#[repr(usize)]
 pub enum Command {
     set_trap_table      = 0,
     mmu_update          = 1,

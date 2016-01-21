@@ -1,4 +1,4 @@
-#[repr(C)]
+#[repr(usize)]
 #[derive(Clone, Copy)]
 pub enum Reason {
     poweroff    = 0,
