@@ -1,5 +1,5 @@
 extern {
-    static start_info_page: *const start_info;
+    pub static start_info_page : &'static start_info;
 }
 
 #[allow(non_snake_case)]
@@ -23,7 +23,7 @@ pub struct start_info {
 }
 
 #[repr(C)]
-pub struct domU{
+pub struct domU {
     pub mfn:        u64,
     pub evtchn:     u32
 }

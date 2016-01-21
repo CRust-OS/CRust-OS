@@ -15,6 +15,7 @@ mod xen;
 
 pub use xen::poweroff;
 pub use xen::console_io::STDOUT;
+use xen::start_info::start_info_page;
 use core::fmt::Write;
 
 #[lang = "eh_personality"]
@@ -25,10 +26,6 @@ extern fn eh_personality() {}
 pub extern fn rust_begin_unwind(_fmt: core::fmt::Arguments, _file_line: &(&'static str, u32)) -> ! {
     xen::emergency_console::print(b"panic_fmt!\n\0");
     xen::crash();
-}
-
-extern {
-    pub static start_info_page: *const xen::start_info::start_info;
 }
 
 fn print_init_info(){
