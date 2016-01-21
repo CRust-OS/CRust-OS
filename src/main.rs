@@ -34,9 +34,23 @@ fn print_init_info(){
     let _ = writeln!(STDOUT, "shared_info: {:#X}", start_info_page.shared_info);
 }
 
+extern {
+    fn main(argc: isize, argv: *const *const u8) -> isize;
+}
+
+#[no_mangle]
+pub fn prologue() {
+    unsafe {
+        use core::ptr;
+        let null: *const u8 = ptr::null();
+        let argv: *const *const u8 = &null;
+        let result = main(0, argv);
+        ()
+    }
+}
 
 #[start]
-pub fn main(_argc: isize, _argv: *const *const u8) -> isize {
+pub fn _main(_argc: isize, _argv: *const *const u8) -> isize {
     xen::emergency_console::print(b"main!\n\0");
     let _ = writeln!(STDOUT, "Hello world!");
     print_init_info();
