@@ -14,6 +14,9 @@ extern crate rlibc;
 mod xen;
 
 pub use xen::poweroff;
+pub use xen::console_io::STDOUT;
+use xen::start_info::start_info_page;
+use core::fmt::Write;
 
 #[lang = "eh_personality"]
 extern fn eh_personality() {}
@@ -25,17 +28,17 @@ pub extern fn rust_begin_unwind(_fmt: core::fmt::Arguments, _file_line: &(&'stat
     xen::crash();
 }
 
-extern {
-    pub static start_info_page: *const xen::start_info::start_info;
+fn print_init_info(){
+    let _ = writeln!(STDOUT, "Magic: {}", core::str::from_utf8(&start_info_page.magic).unwrap_or("ERROR"));
+    let _ = writeln!(STDOUT, "nr_pages: {:#X}", start_info_page.nr_pages);
+    let _ = writeln!(STDOUT, "shared_info: {:#X}", start_info_page.shared_info);
 }
 
 
 #[start]
 pub fn main(_argc: isize, _argv: *const *const u8) -> isize {
     xen::emergency_console::print(b"main!\n\0");
-    xen::console_io::write("Hello world!\n");
-    if let Ok(s) = core::str::from_utf8(unsafe { &(*start_info_page).magic }) {
-        xen::console_io::write(s);
-    }
+    let _ = writeln!(STDOUT, "Hello world!");
+    print_init_info();
     0
 }

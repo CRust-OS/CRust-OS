@@ -1,4 +1,4 @@
-use start_info_page;
+use ::xen::start_info::start_info_page;
 use ::xen::event_channels::send;
 use ::xen::arch::mem::*;
 
