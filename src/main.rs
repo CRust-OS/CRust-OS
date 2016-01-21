@@ -29,11 +29,9 @@ pub extern fn rust_begin_unwind(_fmt: core::fmt::Arguments, _file_line: &(&'stat
 }
 
 fn print_init_info(){
-    unsafe {
-        let _ = writeln!(STDOUT, "Magic: {}", core::str::from_utf8(&(*start_info_page).magic).unwrap_or("ERROR"));
-        let _ = writeln!(STDOUT, "nr_pages: {:#X}", &(*start_info_page).nr_pages);
-        let _ = writeln!(STDOUT, "shared_info: {:#X}", &(*start_info_page).shared_info);
-    }
+    let _ = writeln!(STDOUT, "Magic: {}", core::str::from_utf8(&start_info_page.magic).unwrap_or("ERROR"));
+    let _ = writeln!(STDOUT, "nr_pages: {:#X}", start_info_page.nr_pages);
+    let _ = writeln!(STDOUT, "shared_info: {:#X}", start_info_page.shared_info);
 }
 
 
