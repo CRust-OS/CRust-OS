@@ -7,8 +7,7 @@ _start:
     # Xen places the address of the start_info struct into the SI register.
     mov %rsi, start_info_page
     call main
-    hlt    
-
+    call poweroff
 .bss
 
 .global start_info_page

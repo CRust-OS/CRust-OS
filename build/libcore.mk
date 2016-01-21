@@ -19,4 +19,4 @@ $(LIBCORE_TMP)/.libcore_patched_successfully: $(LIBCORE_TMP)/rustc-nightly $(LIB
 
 $(LIB)/libcore.rlib: $(LIBCORE_TMP)/.libcore_patched_successfully
 	$(MKDIR) $(@D)
-	rustc --target x86_64-unknown-none-gnu --cfg disable_float -Z no-landing-pads --out-dir $(@D) $(LIBCORE_TMP)/rustc-nightly/src/libcore/lib.rs
+	rustc --target x86_64-unknown-xen --cfg disable_float -Z no-landing-pads --out-dir $(@D) $(LIBCORE_TMP)/rustc-nightly/src/libcore/lib.rs
