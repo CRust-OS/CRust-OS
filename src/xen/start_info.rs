@@ -2,7 +2,6 @@ extern {
     pub static start_info_page : &'static start_info;
 }
 
-#[allow(non_snake_case)]
 #[repr(C)]
 pub struct start_info {
     pub magic:          [u8; 32],
@@ -11,7 +10,7 @@ pub struct start_info {
     pub flags:              u32,
     pub store_pfn_t:        u64,
     pub store_evtchn:       u32,
-    pub domU:               domU,           // XXX: Rust currently doens't provde a nice way to handle C unions, right now, only doing the domU version
+    pub console:            console,           // XXX: Rust currently doens't provde a nice way to handle C unions, right now, only doing the domU version
     pub pt_base:            u64,
     pub nr_pt_frames:       u64,
     pub mfn_list:           u64,
@@ -23,7 +22,15 @@ pub struct start_info {
 }
 
 #[repr(C)]
+#[allow(non_snake_case)]
+pub struct console {
+    pub domU: domU
+}
+
+#[repr(C)]
 pub struct domU {
     pub mfn:        u64,
     pub evtchn:     u32
 }
+
+

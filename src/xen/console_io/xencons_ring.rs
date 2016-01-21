@@ -38,7 +38,7 @@ fn mfn_to_pfn(m : u64) -> u64 {
 pub unsafe fn write(s : &[u8]) {
     let mut sent = 0usize;
 
-    let intf = mfn_to_virt((*start_info_page).domU.mfn) as *mut xencons_interface;
+    let intf = mfn_to_virt((*start_info_page).console.domU.mfn) as *mut xencons_interface;
 
     let cons = (*intf).out_cons as usize;
     let mut prod = (*intf).out_prod as usize;
@@ -56,5 +56,5 @@ pub unsafe fn write(s : &[u8]) {
 
     (*intf).out_prod = prod as u32;
 
-    send((*start_info_page).domU.evtchn);
+    send((*start_info_page).console.domU.evtchn);
 }
