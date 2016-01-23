@@ -5,3 +5,9 @@ authors = ["Carl Patenaude-Poulin <carl.patenaudepoulin@mail.mcgill.ca>", "Scott
 
 [dependencies]
 rlibc = "0.1"
+
+[dependencies.mm]
+path = "./mm"
+
+[dependencies.alloc]
+git = "https://github.com/phil-opp/nightly-liballoc.git"

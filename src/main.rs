@@ -3,6 +3,8 @@
 #![feature(stmt_expr_attributes)]
 #![feature(type_macros)]
 #![feature(associated_consts)]
+#![feature(allocator)]
+#![feature(alloc)]
 #![feature(braced_empty_structs)] // XXX: For now
 #![feature(start)]
 //#![feature(core_str_ext)]
@@ -10,6 +12,8 @@
 #![no_std]
 #![allow(dead_code)]              // XXX: For now, because a lot of unused structs
 extern crate rlibc;
+extern crate mm;
+extern crate alloc;
 
 mod xen;
 
@@ -34,9 +38,6 @@ fn print_init_info(){
     let _ = writeln!(STDOUT, "shared_info: {:#X}", start_info_page.shared_info);
 }
 
-extern {
-    fn main(argc: isize, argv: *const *const u8) -> isize;
-}
 
 #[no_mangle]
 pub extern fn prologue() {
@@ -44,15 +45,39 @@ pub extern fn prologue() {
         use core::ptr;
         let null: *const u8 = ptr::null();
         let argv: *const *const u8 = &null;
+        mm::setup();
         let result = main(0, argv);
         ()
     }
 }
 
 #[start]
-pub fn _main(_argc: isize, _argv: *const *const u8) -> isize {
+pub fn main(_argc: isize, _argv: *const *const u8) -> isize {
     xen::emergency_console::print(b"main!\n\0");
     let _ = writeln!(STDOUT, "Hello world!");
+
+    let x = mm::__rust_allocate(1, 16);
+    let y = mm::__rust_allocate(1, 16);
+    unsafe {
+        *x = 100;
+        *y = 2 * *x;
+        if *x == 100 && *y == 200 {
+            let _ = writeln!(STDOUT, "Assigned Properly!");
+        }
+        else {
+            xen::emergency_console::print(b"Error Assigning!\n\0");
+            let _ = writeln!(STDOUT, "Error Assigning");
+        }
+
+        if (y as usize - x as usize) == 16 {
+            let _ = writeln!(STDOUT, "Alligned Properly");
+        }
+        else {
+            xen::emergency_console::print(b"Error Alligning!\n\0");
+            let _ = writeln!(STDOUT, "Error Alligning");
+        }
+    }
     print_init_info();
     0
 }
+

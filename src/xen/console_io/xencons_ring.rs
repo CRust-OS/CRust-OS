@@ -14,27 +14,6 @@ struct xencons_interface {
     out_prod    : XENCONS_RING_IDX
 }
 
-const PAGE_SHIFT : u64 = 12;
-const VIRT_START : u64 = 0x0;
-const HYPERVISOR_VIRT_START : *const u64 = 0xFFFF800000000000 as *const u64;
-
-#[inline]
-fn mfn_to_virt(m: u64) -> u64 {
-    to_virt(mfn_to_pfn(m) << PAGE_SHIFT)
-}
-
-#[inline]
-fn to_virt(m : u64) -> u64 {
-    m + VIRT_START
-}
-
-#[inline]
-fn mfn_to_pfn(m : u64) -> u64 {
-    unsafe {
-        *(HYPERVISOR_VIRT_START.offset(m as isize)) as u64
-    }
-}
-
 pub unsafe fn write(s : &[u8]) {
     let mut sent = 0usize;
 
