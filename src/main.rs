@@ -39,7 +39,7 @@ extern {
 }
 
 #[no_mangle]
-pub fn prologue() {
+pub extern fn prologue() {
     unsafe {
         use core::ptr;
         let null: *const u8 = ptr::null();
