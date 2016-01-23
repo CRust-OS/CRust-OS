@@ -1,5 +1,6 @@
+#[repr(usize)]
 #[allow(non_camel_case_types)]
-enum SubCommand {
+pub enum SubCommand {
     bind_interdomain    = 0,
     bind_virq           = 1,
     bind_pirq           = 2,
@@ -18,16 +19,15 @@ enum SubCommand {
 
 #[repr(C)]
 #[derive(Copy, Clone)]
-struct Port(u32);
-pub struct EventChannel(Port);
+pub struct Port(pub u32);
 
-//pub mod bind_interdomain;
+pub mod bind_interdomain;
 pub mod bind_virq;
 //pub mod bind_pirq;
 pub mod close;
-//pub mod send;
+pub mod send;
 //pub mod status;
-//pub mod alloc_unbound;
+pub mod alloc_unbound;
 //pub mod bind_ipi;
 //pub mod bind_vcpu;
 //pub mod unmask;

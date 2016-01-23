@@ -15,8 +15,12 @@ extern crate rlibc;
 extern crate mm;
 extern crate alloc;
 
-pub mod xen;
-pub mod hypercalls;
+mod xen;
+
+pub use xen::poweroff;
+pub use xen::console_io::STDOUT;
+use xen::start_info::start_info_page;
+use core::fmt::Write;
 
 #[lang = "eh_personality"]
 extern fn eh_personality() {}
@@ -24,57 +28,43 @@ extern fn eh_personality() {}
 #[lang = "panic_fmt"]
 #[no_mangle]
 pub extern fn rust_begin_unwind(_fmt: core::fmt::Arguments, _file_line: &(&'static str, u32)) -> ! {
-    unsafe {
-        hypercalls::console_io::write(b"panic_fmt!\n\0");
-        hypercalls::sched_op::shutdown(&(hypercalls::sched_op::Shutdown { reason: hypercalls::sched_op::ShutdownReason::crash}) as *const hypercalls::sched_op::Shutdown)
-    }
+    xen::emergency_console::print(b"panic_fmt!\n\0");
+    xen::crash();
 }
 
-
-extern {
-    static start_info_page: *const startinfo::start_info;
+fn print_init_info(){
+    let _ = writeln!(STDOUT, "Magic: {}", core::str::from_utf8(&start_info_page.magic).unwrap_or("ERROR"));
+    let _ = writeln!(STDOUT, "nr_pages: {:#X}", start_info_page.nr_pages);
+    let _ = writeln!(STDOUT, "shared_info: {:#X}", start_info_page.shared_info);
 }
-
-mod startinfo;
-mod sharedinfo;
-
-use alloc::boxed::Box;
 
 #[start]
 pub fn main(_argc: isize, _argv: *const *const u8) -> isize {
     mm::setup();
+    xen::emergency_console::print(b"main!\n\0");
+    let _ = writeln!(STDOUT, "Hello world!");
+
     let x = mm::__rust_allocate(1, 16);
     let y = mm::__rust_allocate(1, 16);
     unsafe {
         *x = 100;
         *y = 2 * *x;
         if *x == 100 && *y == 200 {
-            hypercalls::console_io::write(b"Assigned Properly!\n\0");
+            let _ = writeln!(STDOUT, "Assigned Properly!");
         }
         else {
-            hypercalls::console_io::write(b"Error Assigning\n\0");
+            xen::emergency_console::print(b"Error Assigning!\n\0");
+            let _ = writeln!(STDOUT, "Error Assigning");
         }
 
         if (y as usize - x as usize) == 16 {
-            hypercalls::console_io::write(b"Alligned Properly\n\0");
+            let _ = writeln!(STDOUT, "Alligned Properly");
         }
         else {
-            hypercalls::console_io::write(b"Error Alligning\n\0");
+            xen::emergency_console::print(b"Error Alligning!\n\0");
+            let _ = writeln!(STDOUT, "Error Alligning");
         }
     }
-    let a = Box::new(5);
-    if *a == 5 {
-        unsafe {
-            hypercalls::console_io::write(b"Box Worked\n\0");
-        }
-    }
-    else {
-        unsafe {
-            hypercalls::console_io::write(b"Box Failed\n\0");
-        }
-    }
-    unsafe {
-        hypercalls::console_io::write(b"Hello world!\n\0");
-        hypercalls::sched_op::shutdown(&(hypercalls::sched_op::Shutdown { reason: hypercalls::sched_op::ShutdownReason::poweroff}) as *const hypercalls::sched_op::Shutdown);
-    }
+    print_init_info();
+    0
 }

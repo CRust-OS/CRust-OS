@@ -7,3 +7,6 @@ target
 
 # Vim swap files
 *.swp
+
+# OS junk
+**/.DS_Store

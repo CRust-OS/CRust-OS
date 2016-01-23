@@ -1,3 +1,4 @@
+#[repr(usize)]
 #[allow(non_camel_case_types)]
 pub enum SubCommand {
     map_grant_ref = 0,
@@ -14,6 +15,10 @@ pub enum SubCommand {
     swap_grant_ref = 11,
     cache_flush = 12
 }
+
+#[repr(C)]
+#[derive(Clone, Copy)]
+pub struct PFN(pub u64);
 
 //pub mod map_grant_ref;
 //pub mod unmap_grant ref;
