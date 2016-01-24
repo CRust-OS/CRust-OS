@@ -1,3 +1,6 @@
+# Compilers
+$(CC) = gcc
+
 # Source folders
 SRC = src
 BUILD = build

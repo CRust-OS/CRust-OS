@@ -18,6 +18,7 @@ clean:
 	$(RM) $(DIRTY)
 
 # Modules (include is order-sensitive)
+include $(BUILD)/malloc.mk
 include $(BUILD)/Rust.mk
 include $(BUILD)/Boot.mk
 include $(BUILD)/libcore.mk
