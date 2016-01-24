@@ -621,7 +621,7 @@ MAX_RELEASE_CHECK_RATE   default: 4095 unless not HAVE_MMAP
 #define FOOTERS 0
 #endif  /* FOOTERS */
 #ifndef ABORT
-#define ABORT  (-1)//abort() TODO add hypervisor_console_io
+#define ABORT  abort()
 #endif  /* ABORT */
 #ifndef ABORT_ON_ASSERT_FAILURE
 #define ABORT_ON_ASSERT_FAILURE 1
@@ -1643,7 +1643,7 @@ unsigned char _BitScanReverse(unsigned long *index, unsigned long mask);
 #endif /* MAP_ANON */
 #ifdef MAP_ANONYMOUS
 #define MMAP_FLAGS           (MAP_PRIVATE|MAP_ANONYMOUS)
-#define MMAP_DEFAULT(s)       (-1) //TODO mmap(0, (s), MMAP_PROT, MMAP_FLAGS, -1, 0)
+#define MMAP_DEFAULT(s)       mmap(0, (s), MMAP_PROT, MMAP_FLAGS, -1, 0)
 #else /* MAP_ANONYMOUS */
 /*
    Nearly all versions of mmap support MAP_ANONYMOUS, so the following
@@ -1651,10 +1651,10 @@ unsigned char _BitScanReverse(unsigned long *index, unsigned long mask);
 */
 #define MMAP_FLAGS           (MAP_PRIVATE)
 static int dev_zero_fd = -1; /* Cached file descriptor for /dev/zero. */
-#define MMAP_DEFAULT(s) (-1)/*TODO((dev_zero_fd < 0) ? \
+#define MMAP_DEFAULT(s) ((dev_zero_fd < 0) ? \
            (dev_zero_fd = open("/dev/zero", O_RDWR), \
             mmap(0, (s), MMAP_PROT, MMAP_FLAGS, dev_zero_fd, 0)) : \
-            mmap(0, (s), MMAP_PROT, MMAP_FLAGS, dev_zero_fd, 0))*/
+            mmap(0, (s), MMAP_PROT, MMAP_FLAGS, dev_zero_fd, 0))
 #endif /* MAP_ANONYMOUS */
 
 #define DIRECT_MMAP_DEFAULT(s) MMAP_DEFAULT(s)
@@ -1729,9 +1729,9 @@ static FORCEINLINE int win32munmap(void* ptr, size_t size) {
         #define CALL_MMAP(s)        MMAP_DEFAULT(s)
     #endif /* MMAP */
     #ifdef MUNMAP
-        #define CALL_MUNMAP(a, s)   (-1)//TODO MUNMAP((a), (s))
+        #define CALL_MUNMAP(a, s)   MUNMAP((a), (s))
     #else /* MUNMAP */
-        #define CALL_MUNMAP(a, s)   (-1)//TODO MUNMAP_DEFAULT((a), (s))
+        #define CALL_MUNMAP(a, s)   MUNMAP_DEFAULT((a), (s))
     #endif /* MUNMAP */
     #ifdef DIRECT_MMAP
         #define CALL_DIRECT_MMAP(s) DIRECT_MMAP(s)
@@ -3545,9 +3545,9 @@ static void internal_malloc_stats(mstate m) {
       }
     }
     POSTACTION(m); /* drop lock */
-    //TODO fprintf(stderr, "max system bytes = %10lu\n", (unsigned long)(maxfp));
-    //TODO fprintf(stderr, "system bytes     = %10lu\n", (unsigned long)(fp));
-    //TODO fprintf(stderr, "in use bytes     = %10lu\n", (unsigned long)(used));
+    fprintf(stderr, "max system bytes = %10lu\n", (unsigned long)(maxfp));
+    fprintf(stderr, "system bytes     = %10lu\n", (unsigned long)(fp));
+    fprintf(stderr, "in use bytes     = %10lu\n", (unsigned long)(used));
   }
 }
 #endif /* NO_MALLOC_STATS */

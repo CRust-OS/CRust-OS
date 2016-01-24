@@ -21,6 +21,7 @@ pub use xen::poweroff;
 pub use xen::console_io::STDOUT;
 use xen::start_info::start_info_page;
 use core::fmt::Write;
+use alloc::boxed::Box;
 
 #[lang = "eh_personality"]
 extern fn eh_personality() {}
@@ -62,6 +63,7 @@ pub fn main(_argc: isize, _argv: *const *const u8) -> isize {
         *x = 100;
         *y = 2 * *x;
         if *x == 100 && *y == 200 {
+            xen::emergency_console::print(b"Assigned Properly!\n\0");
             let _ = writeln!(STDOUT, "Assigned Properly!");
         }
         else {
@@ -70,6 +72,7 @@ pub fn main(_argc: isize, _argv: *const *const u8) -> isize {
         }
 
         if (y as usize - x as usize) == 16 {
+            xen::emergency_console::print(b"Alligned Properly!\n\0");
             let _ = writeln!(STDOUT, "Alligned Properly");
         }
         else {
@@ -77,6 +80,16 @@ pub fn main(_argc: isize, _argv: *const *const u8) -> isize {
             let _ = writeln!(STDOUT, "Error Alligning");
         }
     }
+
+    let x = Box::new(12);
+
+    if *x == 12 {
+        xen::emergency_console::print(b"Box Worked!\n\0");
+    }
+    else {
+        xen::emergency_console::print(b"Box Failed!\n\0");
+    }
+
     print_init_info();
     0
 }
