@@ -1,6 +1,7 @@
 use ::xen::start_info::start_info_page;
 use ::xen::event_channels::send;
 use ::xen::arch::mem::*;
+use ::xen::ring_buffer::Ring;
 
 type XENCONS_RING_IDX = u32;
 
@@ -14,26 +15,44 @@ struct xencons_interface {
     out_prod    : XENCONS_RING_IDX
 }
 
-pub unsafe fn write(s : &[u8]) {
-    let mut sent = 0usize;
-
-    let intf = mfn_to_virt((*start_info_page).console.domU.mfn) as *mut xencons_interface;
-
-    let cons = (*intf).out_cons as usize;
-    let mut prod = (*intf).out_prod as usize;
-
-    mb();
-
-    while (sent < s.len()) && ((prod - cons) < (*intf).output.len()) {
-        let idx = prod & ((*intf).output.len() - 1); // mask the index to make sure we don't overflow
-        prod = prod + 1;
-        (*intf).output[idx] = s[sent];
-        sent = sent + 1;
+impl Ring for xencons_interface {
+    fn input_buffer(&mut self) -> &mut [u8] {
+        &mut(self.input)
+    }
+    fn output_buffer(&mut self) -> &mut [u8] {
+        &mut(self.output)
     }
 
-    wmb();
+    fn get_in_cons(&self) -> usize {
+        self.in_cons as usize
+    }
+    fn get_out_cons(&self) -> usize {
+        self.out_cons as usize
+    }
+    fn get_in_prod(&self) -> usize {
+        self.in_prod as usize
+    }
+    fn get_out_prod(&self) -> usize {
+        self.out_prod as usize
+    }
 
-    (*intf).out_prod = prod as u32;
+    fn set_in_cons(&mut self, in_cons: usize) {
+        self.in_cons = in_cons as u32;
+    }
+    fn set_out_cons(&mut self, out_cons: usize) {
+        self.out_cons = out_cons as u32;
+    }
+    fn set_in_prod(&mut self, in_prod : usize) {
+        self.in_prod = in_prod as u32;
+    }
+    fn set_out_prod(&mut self, out_prod : usize) {
+        self.out_prod = out_prod as u32;
+    }
 
-    send((*start_info_page).console.domU.evtchn);
+}
+
+pub unsafe fn write(s : &[u8]) {
+    let intf_ptr = mfn_to_virt((*start_info_page).console.domU.mfn) as *mut xencons_interface;
+    let intf = intf_ptr.as_mut().unwrap();
+    intf.write_notify(s, (*start_info_page).console.domU.evtchn);
 }

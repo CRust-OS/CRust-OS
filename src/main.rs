@@ -1,3 +1,4 @@
+#![feature(ptr_as_ref)]
 #![feature(lang_items)]
 #![feature(asm)]
 #![feature(stmt_expr_attributes)]
@@ -33,9 +34,9 @@ pub extern fn rust_begin_unwind(_fmt: core::fmt::Arguments, _file_line: &(&'stat
 }
 
 fn print_init_info(){
-    let _ = writeln!(STDOUT, "Magic: {}", core::str::from_utf8(&start_info_page.magic).unwrap_or("ERROR"));
-    let _ = writeln!(STDOUT, "nr_pages: {:#X}", start_info_page.nr_pages);
-    let _ = writeln!(STDOUT, "shared_info: {:#X}", start_info_page.shared_info);
+    let _ = writeln!(STDOUT, "Magic: {}\r", core::str::from_utf8(&start_info_page.magic).unwrap_or("ERROR"));
+    let _ = writeln!(STDOUT, "nr_pages: {:#X}\r", start_info_page.nr_pages);
+    let _ = writeln!(STDOUT, "shared_info: {:#X}\r", start_info_page.shared_info);
 }
 
 
@@ -54,7 +55,7 @@ pub extern fn prologue() {
 #[start]
 pub fn main(_argc: isize, _argv: *const *const u8) -> isize {
     xen::emergency_console::print(b"main!\n\0");
-    let _ = writeln!(STDOUT, "Hello world!");
+    let _ = writeln!(STDOUT, "Hello world!\r");
 
     let x = mm::__rust_allocate(1, 16);
     let y = mm::__rust_allocate(1, 16);
@@ -62,19 +63,19 @@ pub fn main(_argc: isize, _argv: *const *const u8) -> isize {
         *x = 100;
         *y = 2 * *x;
         if *x == 100 && *y == 200 {
-            let _ = writeln!(STDOUT, "Assigned Properly!");
+            let _ = writeln!(STDOUT, "Assigned Properly!\r");
         }
         else {
             xen::emergency_console::print(b"Error Assigning!\n\0");
-            let _ = writeln!(STDOUT, "Error Assigning");
+            let _ = writeln!(STDOUT, "Error Assigning\r");
         }
 
         if (y as usize - x as usize) == 16 {
-            let _ = writeln!(STDOUT, "Alligned Properly");
+            let _ = writeln!(STDOUT, "Alligned Properly\r");
         }
         else {
             xen::emergency_console::print(b"Error Alligning!\n\0");
-            let _ = writeln!(STDOUT, "Error Alligning");
+            let _ = writeln!(STDOUT, "Error Alligning\r");
         }
     }
     print_init_info();
