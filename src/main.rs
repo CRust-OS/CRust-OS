@@ -59,6 +59,7 @@ pub fn main(_argc: isize, _argv: *const *const u8) -> isize {
 
     let x = mm::__rust_allocate(1, 16);
     let y = mm::__rust_allocate(1, 16);
+
     unsafe {
         *x = 100;
         *y = 2 * *x;
@@ -69,15 +70,6 @@ pub fn main(_argc: isize, _argv: *const *const u8) -> isize {
         else {
             xen::emergency_console::print(b"Error Assigning!\n\0");
             let _ = writeln!(STDOUT, "Error Assigning");
-        }
-
-        if (y as usize - x as usize) == 16 {
-            xen::emergency_console::print(b"Alligned Properly!\n\0");
-            let _ = writeln!(STDOUT, "Alligned Properly");
-        }
-        else {
-            xen::emergency_console::print(b"Error Alligning!\n\0");
-            let _ = writeln!(STDOUT, "Error Alligning");
         }
     }
 

@@ -7,10 +7,16 @@
 
 
 static mut heap_end : usize = 0;
-static mut __errno_location : usize = 0;
+
+#[no_mangle]
+pub static mut __errno_location : usize = 0;
 
 extern {
     static HEAP : *const u8;
+    fn dlmalloc(sz : usize) -> *mut u8;
+    fn dlfree(p : *mut u8);
+    fn dlrealloc_in_place(p : *mut u8, sz : usize) -> *mut u8;
+    fn dlrealloc(p : *mut u8, sz : usize) -> *mut u8;
 }
 
 #[no_mangle]
@@ -47,26 +53,34 @@ pub extern fn sbrk(incr: usize) -> *const u8 {
 ///! Currently, the pointer can't be freed
 pub extern fn __rust_allocate(size: usize, _align: usize) -> *mut u8 {
     unsafe {
-        heap_end = heap_end + size + (_align - size % _align);
-        heap_end as *mut u8
+        dlmalloc(size + _align - size % _align)
     }
 }
 
 #[no_mangle]
 pub extern fn __rust_deallocate(ptr: *mut u8, _old_size: usize, _align: usize) {
-
+    unsafe {
+        dlfree(ptr);
+    }
 }
 
 #[no_mangle]
 pub extern fn __rust_reallocate(ptr: *mut u8, _old_size: usize, size: usize,  _align: usize) 
     -> *mut u8 {
-        __rust_allocate(size, _align)
+        unsafe {
+            //TODO: what if old_size != _size
+            dlrealloc(ptr, size)
+        }
 }
 
 #[no_mangle]
 pub extern fn __rust_reallocate_inplace(_ptr: *mut u8, old_size: usize, _size: usize, _align: usize)
     -> usize {
-        0
+        unsafe {
+            //TODO: what if old_size != _size
+            dlrealloc_in_place(_ptr, _size);
+            _size
+        }
 }
 
 #[no_mangle]
