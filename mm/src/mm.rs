@@ -30,9 +30,8 @@ pub extern fn setup() {
 #[no_mangle]
 pub extern fn sbrk(incr: usize) -> *const u8 {
     unsafe {
-        let previous_heap_end : usize;
         if heap_end == 0 {
-                heap_end = HEAP as usize;
+            heap_end = HEAP as usize;
         }
 
         let previous_heap_end = heap_end;

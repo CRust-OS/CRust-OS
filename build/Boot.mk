@@ -14,8 +14,8 @@ $(OBJ)/%.o: $(OBJ)/%.s
 	$(AS) $(AS_ARGS) -o $@ $<
 
 ASM_FILES = $(shell find $(BOOT) -name "*.S")
-OBJ_FILES = $(patsubst $(BOOT)/%.S,$(OBJ)/%.o,$(ASM_FILES))
-$(DEPS)/$(BIN)/boot.o.d: $(ASM_FILES) $(LIB)/malloc 
+OBJ_FILES = $(patsubst $(BOOT)/%.S,$(OBJ)/%.o,$(ASM_FILES)) $(MALLOC_OUT)
+$(DEPS)/$(BIN)/boot.o.d: $(ASM_FILES) 
 	$(MKDIR) $(@D)
 	$(ECHO) "$(BIN)/boot.o: $(OBJ_FILES)" > $@
 -include $(DEPS)/$(BIN)/boot.o.d
@@ -23,4 +23,4 @@ $(DEPS)/$(BIN)/boot.o.d: $(ASM_FILES) $(LIB)/malloc
 $(BIN)/boot.o:
 	$(MKDIR) $(@D)
 	$(ECHO) Bundling $(OBJ_FILES)...
-	$(LD) --relocatable -o $@ $(OBJ_FILES) $(MALLOC_OUT)
+	$(LD) --relocatable -o $@ $(OBJ_FILES)

@@ -9,5 +9,3 @@ $(MALLOC_OUT): $(MALLOC_SRC)
 	$(MKDIR) $(@D)
 	$(cc) $(DABORT) $(DEFINE) $(CFLAGS) $(MALLOC_SRC) -o $(MALLOC_OUT)
 
-$(LIB)/malloc: $(MALLOC_OUT)
-	$(ECHO) "TODO: make malloc into a proper object file"
