@@ -26,6 +26,8 @@ use alloc::boxed::Box;
 #[lang = "eh_personality"]
 extern fn eh_personality() {}
 
+const len : usize = 400; //breaks at len=445;
+
 #[lang = "panic_fmt"]
 #[no_mangle]
 pub extern fn rust_begin_unwind(_fmt: core::fmt::Arguments, _file_line: &(&'static str, u32)) -> ! {
@@ -80,6 +82,17 @@ pub fn main(_argc: isize, _argv: *const *const u8) -> isize {
     }
     else {
         xen::emergency_console::print(b"Box Failed!\n\0");
+    }
+    
+    let mut a = Box::new([0; len]);
+    for i in 1..len {
+        a[i] = i;
+    }
+
+    for i in 1..len {
+        if a[i] != i {
+            xen::emergency_console::print(b"Memory Error\n\0");
+        }
     }
 
     print_init_info();
