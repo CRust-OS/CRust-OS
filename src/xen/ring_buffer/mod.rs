@@ -15,6 +15,7 @@ pub trait ReadableRing {
         return len - 1;
     }
 }
+
 pub trait WritableRing {
     fn output_buffer(&mut self) -> &mut [u8];
 
@@ -38,9 +39,9 @@ pub trait WritableRing {
         mb();
 
         {
-            let output_mask = { self.output_mask() };
-            let output_len = { self.output_buffer().len() };
+            let output_mask = self.output_mask();
             let mut output = self.output_buffer();
+            let output_len = output.len();
 
             while (sent < buf.len()) && ((prod - cons) < output_len) {
                 let idx = prod & output_mask; // mask the index to make sure we don't overflow
@@ -60,5 +61,4 @@ pub trait WritableRing {
         self.write(buf);
         unsafe { send(evtchn); }
     }
-
 }
