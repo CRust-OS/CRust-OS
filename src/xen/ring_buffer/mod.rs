@@ -1,25 +1,28 @@
 use ::xen::arch::mem::*;
 use ::xen::event_channels::send;
 
-// TODO: Break up Ring Trait in WriteableRing and ReadableRing
-pub trait Ring {
+pub trait ReadableRing {
+    fn read(&mut self) {
+        // TODO
+    }
     fn input_buffer(&mut self) -> &mut [u8];
-    fn output_buffer(&mut self) -> &mut [u8];
-
     fn get_in_cons(&self) -> usize; 
-    fn get_out_cons(&self) -> usize;
     fn get_in_prod(&self) -> usize;
-    fn get_out_prod(&self) -> usize;
-
     fn set_in_cons(&mut self, usize);
-    fn set_out_cons(&mut self, usize);
     fn set_in_prod(&mut self, usize);
-    fn set_out_prod(&mut self, usize);
-
     fn input_mask(&mut self) -> usize {
         let len = self.input_buffer().len();
         return len - 1;
     }
+}
+pub trait WritableRing {
+    fn output_buffer(&mut self) -> &mut [u8];
+
+    fn get_out_cons(&self) -> usize;
+    fn get_out_prod(&self) -> usize;
+    fn set_out_cons(&mut self, usize);
+    fn set_out_prod(&mut self, usize);
+
 
     fn output_mask(&mut self) -> usize {
         let len = self.output_buffer().len();
@@ -58,7 +61,4 @@ pub trait Ring {
         unsafe { send(evtchn); }
     }
 
-    fn read(&mut self) {
-        // TODO
-    }
 }
