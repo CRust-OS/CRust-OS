@@ -19,6 +19,7 @@ mod xen;
 
 pub use xen::poweroff;
 pub use xen::console_io::STDOUT;
+pub use xen::sbrk;
 use xen::start_info::start_info_page;
 use core::fmt::Write;
 use alloc::boxed::Box;
@@ -26,7 +27,7 @@ use alloc::boxed::Box;
 #[lang = "eh_personality"]
 extern fn eh_personality() {}
 
-const len : usize = 400; //breaks at len=445;
+const LEN : usize = 400; //breaks at LEN=445;
 
 #[lang = "panic_fmt"]
 #[no_mangle]
@@ -44,14 +45,11 @@ fn print_init_info(){
 
 #[no_mangle]
 pub extern fn prologue() {
-    unsafe {
-        use core::ptr;
-        let null: *const u8 = ptr::null();
-        let argv: *const *const u8 = &null;
-        mm::setup();
-        let result = main(0, argv);
-        ()
-    }
+    use core::ptr;
+    let null: *const u8 = ptr::null();
+    let argv: *const *const u8 = &null;
+    let result = main(0, argv);
+    ()
 }
 
 #[start]
@@ -84,18 +82,19 @@ pub fn main(_argc: isize, _argv: *const *const u8) -> isize {
         xen::emergency_console::print(b"Box Failed!\n\0");
     }
     
-    let mut a = Box::new([0; len]);
-    for i in 1..len {
+    let mut a = Box::new([0; LEN]);
+    for i in 1..LEN {
         a[i] = i;
     }
 
-    for i in 1..len {
+    for i in 1..LEN {
         if a[i] != i {
             xen::emergency_console::print(b"Memory Error\n\0");
         }
     }
 
     print_init_info();
+
     0
 }
 

@@ -8,6 +8,7 @@ pub mod start_info;
 pub mod console_io;
 
 pub mod emergency_console;
+pub mod sbrk;
 
 fn shutdown(reason: hypercalls::sched_op::shutdown::Reason) -> ! {
     use self::hypercalls::Command;

@@ -1553,7 +1553,7 @@ unsigned char _BitScanReverse(unsigned long *index, unsigned long mask);
 #    endif
 #  endif
 #  ifdef _SC_PAGE_SIZE
-#    define malloc_getpagesize 1024 //TODO sysconf(_SC_PAGE_SIZE)
+#    define malloc_getpagesize 4096 //TODO sysconf(_SC_PAGE_SIZE)
 #  else
 #    if defined(BSD) || defined(DGUX) || defined(HAVE_GETPAGESIZE)
        extern size_t getpagesize();
