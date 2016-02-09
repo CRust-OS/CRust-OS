@@ -19,16 +19,16 @@ impl WritableRing for xencons_interface {
     fn output_buffer(&mut self) -> &mut [u8] {
         &mut(self.output)
     }
-    fn get_out_cons(&self) -> usize {
+    fn get_output_consumer_idx(&self) -> usize {
         self.out_cons as usize
     }
-    fn get_out_prod(&self) -> usize {
+    fn get_output_producer_idx(&self) -> usize {
         self.out_prod as usize
     }
-    fn set_out_cons(&mut self, out_cons: usize) {
+    fn set_output_consumer_idx(&mut self, out_cons: usize) {
         self.out_cons = out_cons as u32;
     }
-    fn set_out_prod(&mut self, out_prod : usize) {
+    fn set_output_producer_idx(&mut self, out_prod : usize) {
         self.out_prod = out_prod as u32;
     }
 }
@@ -37,16 +37,16 @@ impl ReadableRing for xencons_interface {
     fn input_buffer(&mut self) -> &mut [u8] {
         &mut(self.input)
     }
-    fn get_in_cons(&self) -> usize {
+    fn get_input_consumer_idx(&self) -> usize {
         self.in_cons as usize
     }
-    fn get_in_prod(&self) -> usize {
+    fn get_input_producer_idx(&self) -> usize {
         self.in_prod as usize
     }
-    fn set_in_cons(&mut self, in_cons: usize) {
+    fn set_input_consumer_idx(&mut self, in_cons: usize) {
         self.in_cons = in_cons as u32;
     }
-    fn set_in_prod(&mut self, in_prod : usize) {
+    fn set_input_producer_idx(&mut self, in_prod : usize) {
         self.in_prod = in_prod as u32;
     }
 }

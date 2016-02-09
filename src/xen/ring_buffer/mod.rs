@@ -6,10 +6,10 @@ pub trait ReadableRing {
         // TODO
     }
     fn input_buffer(&mut self) -> &mut [u8];
-    fn get_in_cons(&self) -> usize; 
-    fn get_in_prod(&self) -> usize;
-    fn set_in_cons(&mut self, usize);
-    fn set_in_prod(&mut self, usize);
+    fn get_input_consumer_idx(&self) -> usize; 
+    fn get_input_producer_idx(&self) -> usize;
+    fn set_input_consumer_idx(&mut self, usize);
+    fn set_input_producer_idx(&mut self, usize);
     fn input_mask(&mut self) -> usize {
         let len = self.input_buffer().len();
         return len - 1;
@@ -19,10 +19,10 @@ pub trait ReadableRing {
 pub trait WritableRing {
     fn output_buffer(&mut self) -> &mut [u8];
 
-    fn get_out_cons(&self) -> usize;
-    fn get_out_prod(&self) -> usize;
-    fn set_out_cons(&mut self, usize);
-    fn set_out_prod(&mut self, usize);
+    fn get_output_consumer_idx(&self) -> usize;
+    fn get_output_producer_idx(&self) -> usize;
+    fn set_output_consumer_idx(&mut self, usize);
+    fn set_output_producer_idx(&mut self, usize);
 
 
     fn output_mask(&mut self) -> usize {
@@ -33,8 +33,8 @@ pub trait WritableRing {
     fn write(&mut self, buf : &[u8]) {
         let mut sent = 0usize;
 
-        let cons = self.get_out_cons(); 
-        let mut prod = self.get_out_prod();
+        let consumer_idx = self.get_output_consumer_idx(); 
+        let mut producer_idx = self.get_output_producer_idx();
 
         mb();
 
@@ -43,9 +43,9 @@ pub trait WritableRing {
             let mut output = self.output_buffer();
             let output_len = output.len();
 
-            while (sent < buf.len()) && ((prod - cons) < output_len) {
-                let idx = prod & output_mask; // mask the index to make sure we don't overflow
-                prod = prod + 1;
+            while (sent < buf.len()) && ((producer_idx - consumer_idx) < output_len) {
+                let idx = producer_idx & output_mask; // mask the index to make sure we don't overflow
+                producer_idx = producer_idx + 1;
                 output[idx] = buf[sent];
                 sent = sent + 1;
             }
@@ -53,7 +53,7 @@ pub trait WritableRing {
 
         wmb();
 
-        self.set_out_prod(prod);
+        self.set_output_producer_idx(producer_idx);
 
     }
 
