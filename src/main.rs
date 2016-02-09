@@ -1,8 +1,11 @@
+#![feature(ptr_as_ref)]
 #![feature(lang_items)]
 #![feature(asm)]
 #![feature(stmt_expr_attributes)]
 #![feature(type_macros)]
 #![feature(associated_consts)]
+#![feature(allocator)]
+#![feature(alloc)]
 #![feature(braced_empty_structs)] // XXX: For now
 #![feature(start)]
 //#![feature(core_str_ext)]
@@ -10,10 +13,15 @@
 #![no_std]
 #![allow(dead_code)]              // XXX: For now, because a lot of unused structs
 extern crate rlibc;
+extern crate mm;
+extern crate alloc;
 
 mod xen;
 
 pub use xen::poweroff;
+pub use xen::console_io::STDOUT;
+use xen::start_info::start_info_page;
+use core::fmt::Write;
 
 #[lang = "eh_personality"]
 extern fn eh_personality() {}
@@ -25,17 +33,52 @@ pub extern fn rust_begin_unwind(_fmt: core::fmt::Arguments, _file_line: &(&'stat
     xen::crash();
 }
 
-extern {
-    pub static start_info_page: *const xen::start_info::start_info;
+fn print_init_info(){
+    let _ = writeln!(STDOUT, "Magic: {}\r", core::str::from_utf8(&start_info_page.magic).unwrap_or("ERROR"));
+    let _ = writeln!(STDOUT, "nr_pages: {:#X}\r", start_info_page.nr_pages);
+    let _ = writeln!(STDOUT, "shared_info: {:#X}\r", start_info_page.shared_info);
 }
 
+
+#[no_mangle]
+pub extern fn prologue() {
+    unsafe {
+        use core::ptr;
+        let null: *const u8 = ptr::null();
+        let argv: *const *const u8 = &null;
+        mm::setup();
+        let result = main(0, argv);
+        ()
+    }
+}
 
 #[start]
 pub fn main(_argc: isize, _argv: *const *const u8) -> isize {
     xen::emergency_console::print(b"main!\n\0");
-    xen::console_io::write("Hello world!\n");
-    if let Ok(s) = core::str::from_utf8(unsafe { &(*start_info_page).magic }) {
-        xen::console_io::write(s);
+    let _ = writeln!(STDOUT, "Hello world!\r");
+
+    let x = mm::__rust_allocate(1, 16);
+    let y = mm::__rust_allocate(1, 16);
+    unsafe {
+        *x = 100;
+        *y = 2 * *x;
+        if *x == 100 && *y == 200 {
+            let _ = writeln!(STDOUT, "Assigned Properly!\r");
+        }
+        else {
+            xen::emergency_console::print(b"Error Assigning!\n\0");
+            let _ = writeln!(STDOUT, "Error Assigning\r");
+        }
+
+        if (y as usize - x as usize) == 16 {
+            let _ = writeln!(STDOUT, "Alligned Properly\r");
+        }
+        else {
+            xen::emergency_console::print(b"Error Alligning!\n\0");
+            let _ = writeln!(STDOUT, "Error Alligning\r");
+        }
     }
+    print_init_info();
     0
 }
+

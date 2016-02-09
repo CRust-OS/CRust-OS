@@ -1,6 +1,7 @@
-use start_info_page;
+use ::xen::start_info::start_info_page;
 use ::xen::event_channels::send;
 use ::xen::arch::mem::*;
+use ::xen::ring_buffer::{WritableRing,ReadableRing};
 
 type XENCONS_RING_IDX = u32;
 
@@ -14,47 +15,44 @@ struct xencons_interface {
     out_prod    : XENCONS_RING_IDX
 }
 
-const PAGE_SHIFT : u64 = 12;
-const VIRT_START : u64 = 0x0;
-const HYPERVISOR_VIRT_START : *const u64 = 0xFFFF800000000000 as *const u64;
-
-#[inline]
-fn mfn_to_virt(m: u64) -> u64 {
-    to_virt(mfn_to_pfn(m) << PAGE_SHIFT)
+impl WritableRing for xencons_interface {
+    fn output_buffer(&mut self) -> &mut [u8] {
+        &mut(self.output)
+    }
+    fn get_output_consumer_idx(&self) -> usize {
+        self.out_cons as usize
+    }
+    fn get_output_producer_idx(&self) -> usize {
+        self.out_prod as usize
+    }
+    fn set_output_consumer_idx(&mut self, out_cons: usize) {
+        self.out_cons = out_cons as u32;
+    }
+    fn set_output_producer_idx(&mut self, out_prod : usize) {
+        self.out_prod = out_prod as u32;
+    }
 }
 
-#[inline]
-fn to_virt(m : u64) -> u64 {
-    m + VIRT_START
-}
-
-#[inline]
-fn mfn_to_pfn(m : u64) -> u64 {
-    unsafe {
-        *(HYPERVISOR_VIRT_START.offset(m as isize)) as u64
+impl ReadableRing for xencons_interface {
+    fn input_buffer(&mut self) -> &mut [u8] {
+        &mut(self.input)
+    }
+    fn get_input_consumer_idx(&self) -> usize {
+        self.in_cons as usize
+    }
+    fn get_input_producer_idx(&self) -> usize {
+        self.in_prod as usize
+    }
+    fn set_input_consumer_idx(&mut self, in_cons: usize) {
+        self.in_cons = in_cons as u32;
+    }
+    fn set_input_producer_idx(&mut self, in_prod : usize) {
+        self.in_prod = in_prod as u32;
     }
 }
 
 pub unsafe fn write(s : &[u8]) {
-    let mut sent = 0usize;
-
-    let intf = mfn_to_virt((*start_info_page).domU.mfn) as *mut xencons_interface;
-
-    let cons = (*intf).out_cons as usize;
-    let mut prod = (*intf).out_prod as usize;
-
-    mb();
-
-    while (sent < s.len()) && ((prod - cons) < (*intf).output.len()) {
-        let idx = prod & ((*intf).output.len() - 1); // mask the index to make sure we don't overflow
-        prod = prod + 1;
-        (*intf).output[idx] = s[sent];
-        sent = sent + 1;
-    }
-
-    wmb();
-
-    (*intf).out_prod = prod as u32;
-
-    send((*start_info_page).domU.evtchn);
+    let intf_ptr = mfn_to_virt((*start_info_page).console.domU.mfn) as *mut xencons_interface;
+    let intf = intf_ptr.as_mut().unwrap();
+    intf.write_notify(s, (*start_info_page).console.domU.evtchn);
 }

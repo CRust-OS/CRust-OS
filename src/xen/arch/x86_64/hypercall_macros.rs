@@ -24,7 +24,7 @@ macro_rules! hypercall {
                 : "={rax}" (result), 
                   "={rdi}" (__ign1)
                 : "i" ($op as isize * 32),
-                  "1" ($a1 as isize)
+                  "1" ($a1)
                 : "memory" 
                 : "volatile"
             );					
@@ -41,7 +41,7 @@ macro_rules! hypercall {
                 : "={rax}" (result),
                   "={rdi}" (__ign1), "={rsi}" (__ign2)
                 : "i" ($op as isize * 32),
-                  "1" ($a1 as isize), "2" ($a2 as isize)
+                  "1" ($a1), "2" ($a2)
                 : "memory" 
                 : "volatile"
             );					
@@ -59,7 +59,7 @@ macro_rules! hypercall {
                 : "={rax}" (result),
                   "={rdi}" (__ign1), "={rsi}" (__ign2), "={rdx}" (__ign3)
                 : "i" ($op as isize * 32),
-                  "1" ($a1 as isize), "2" ($a2 as isize), "3" ($a3 as isize)
+                  "1" ($a1), "2" ($a2), "3" ($a3)
                 : "memory" 
                 : "volatile"
             );
@@ -78,7 +78,7 @@ macro_rules! hypercall {
                 : "={rax}" (result),
                   "={rdi}" (__ign1), "={rsi}" (__ign2), "={rdx}" (__ign3), "={r10}" (__ign4)
                 : "i" ($op as isize * 32),
-                  "1" ($a1 as isize), "2" ($a2 as isize), "3" ($a3 as isize), "4" ($a4 as isize)
+                  "1" ($a1), "2" ($a2), "3" ($a3), "4" ($a4)
                 : "memory" 
                 : "volatile"
             );
@@ -98,7 +98,7 @@ macro_rules! hypercall {
                 : "={rax}" (result),
                   "={rdi}" (__ign1), "={rsi}" (__ign2), "={rdx}" (__ign3), "={r10}" (__ign4), "={r8}" (__ign5)
                 : "i" ($op as isize * 32),
-                  "1" ($a1 as isize), "2" ($a2 as isize), "3" ($a3 as isize), "4" ($a4 as isize), "5" ($a5 as isize)
+                  "1" ($a1), "2" ($a2), "3" ($a3), "4" ($a4), "5" ($a5)
                 : "memory" 
                 : "volatile"
             );

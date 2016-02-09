@@ -1,6 +1,7 @@
 #[macro_use]
 mod arch;
 
+pub mod ring_buffer;
 mod hypercalls;
 pub mod event_channels;
 mod grant_tables;

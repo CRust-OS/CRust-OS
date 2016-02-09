@@ -1,3 +1,4 @@
+#[repr(usize)]
 #[allow(non_camel_case_types)]
 pub enum SubCommand {
     map_grant_ref = 0,

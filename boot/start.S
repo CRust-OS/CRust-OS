@@ -6,7 +6,7 @@ _start:
     mov %rbp, %rsp
     # Xen places the address of the start_info struct into the SI register.
     mov %rsi, start_info_page
-    call main
+    call prologue
     call poweroff
 .bss
 

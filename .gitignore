@@ -10,3 +10,6 @@ target
 
 # OS junk
 **/.DS_Store
+
+# Ctags file
+tags

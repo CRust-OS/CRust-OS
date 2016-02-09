@@ -10,7 +10,7 @@ pub struct Args {
     pub port: Port
 }
 
-#[repr(C)]
+#[repr(u32)]
 #[derive(Clone, Copy)]
 pub enum Virq {
     Timer       = 0,
