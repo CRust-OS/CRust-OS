@@ -23,5 +23,6 @@ $(RUSTLIB)/liballoc.rlib:         $(RUSTLIB)/libcore.rlib
 $(RUSTLIB)/librustc_unicode.rlib: $(RUSTLIB)/libcore.rlib
 $(RUSTLIB)/libcollections.rlib:   $(RUSTLIB)/liballoc.rlib $(RUSTLIB)/librustc_unicode.rlib
 
-.PHONY: runtime
-runtime: $(patsubst %, $(RUSTLIB)/%.rlib, $(LIBS))
+$(TMP)/runtime: $(patsubst %, $(RUSTLIB)/%.rlib, $(LIBS))
+	$(MKDIR) $(@D)
+	@touch $@

@@ -50,8 +50,11 @@ pub extern fn prologue() {
         use core::ptr;
         let null: *const u8 = ptr::null();
         let argv: *const *const u8 = &null;
+        xen::emergency_console::print(b"mm::setup\n\0");
         mm::setup();
+        xen::emergency_console::print(b"xen::console_io::initialize\n\0");
         xen::console_io::initialize();
+        xen::emergency_console::print(b"xen::xenstore::initialize\n\0");
         xen::xenstore::initialize();
         xen::emergency_console::print(b"end of prologue!\n\0");
         let _result = main(0, argv);
@@ -62,7 +65,10 @@ pub extern fn prologue() {
 #[start]
 pub fn main(_argc: isize, _argv: *const *const u8) -> isize {
     xen::emergency_console::print(b"main!\n\0");
-    let _ = writeln!(STDOUT, "Hello world!\r");
+    unsafe {
+        let vm_name = xen::xenstore::XENSTORE.write().as_mut().unwrap().read("name").ok().unwrap();
+        let _ = writeln!(STDOUT, "Hello world {}!\r", vm_name);
+    }
 
     let x = mm::__rust_allocate(1, 16);
     let y = mm::__rust_allocate(1, 16);

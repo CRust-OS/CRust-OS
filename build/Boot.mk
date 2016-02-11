@@ -20,7 +20,7 @@ $(DEPS)/$(BIN)/boot.o.d: $(ASM_FILES)
 	$(ECHO) "$(BIN)/boot.o: $(OBJ_FILES)" > $@
 -include $(DEPS)/$(BIN)/boot.o.d
 
-$(BIN)/boot.o:
+$(BIN)/boot.o: $(OBJ_FILES)
 	$(MKDIR) $(@D)
 	$(ECHO) Bundling $(OBJ_FILES)...
 	$(LD) --relocatable -o $@ $(OBJ_FILES)

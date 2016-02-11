@@ -1,5 +1,6 @@
-use std::io::*;
+use std::io;
 use core::*;
+use core::fmt::Write;
 use core::iter::*;
 use core::mem::*;
 use core::sync::atomic::*;
@@ -8,12 +9,13 @@ use xen::arch::mem::*;
 use xen::event_channels::*;
 use xen::start_info::start_info_page;
 use alloc::raw_vec::RawVec;
+use xen::console_io::{STDOUT};
 use collections::{String, Vec};
 
 pub static XENSTORE: RwLock<Option<XenStore<'static>>> = RwLock::new(Option::None);
 
 const XENSTORE_RING_SIZE : usize = 1024;
-static mut req_counter : AtomicIsize = AtomicIsize::new(0);
+static mut req_counter : AtomicIsize = AtomicIsize::new(1);
 
 pub struct XenStore<'a> {
     interface: &'a mut xenstore_domain_interface,
@@ -30,7 +32,7 @@ struct xenstore_domain_interface {
     rsp_prod: u32
 }
 
-impl Write for xenstore_domain_interface {
+impl io::Write for xenstore_domain_interface {
     //Listing 8.4 in The Definitive Guide to the Xen Hypervisor
     fn write(&mut self, buf: &[u8]) -> Result<usize, &'static str> {
         if buf.len() > XENSTORE_RING_SIZE {
@@ -57,7 +59,7 @@ impl Write for xenstore_domain_interface {
     }
 }
 
-impl Read for xenstore_domain_interface {
+impl io::Read for xenstore_domain_interface {
     //Listing 8.5 in The Definitive Guide to the Xen Hypervisor
     fn read(&mut self, buf: &mut [u8]) -> Result<usize, &'static str> {
         let mut i = self.rsp_cons;
@@ -73,7 +75,7 @@ impl Read for xenstore_domain_interface {
             *b = self.rsp[ring_index];
             i = i + 1;
         }
-
+        self.rsp_cons = i;
         Ok(result)
     }
 }
@@ -81,6 +83,7 @@ impl Read for xenstore_domain_interface {
 impl xenstore_domain_interface {
     //Listing 8.6 in The Definitive Guide to the Xen Hypervisor
     unsafe fn ignore(&mut self, bytes: usize) {
+        use std::io::Read;
         if bytes != 0 {
             let vec = RawVec::<u8>::with_capacity(bytes);
             let slice = slice::from_raw_parts_mut(vec.ptr(), bytes);
@@ -90,8 +93,10 @@ impl xenstore_domain_interface {
 }
 
 impl<'a> XenStore<'a> {
+
     //Listing 8.7 in The Definitive Guide to the Xen Hypervisor
-    unsafe fn write(&mut self, key: &str, value: &str) -> Result<(), &'static str> {
+    pub unsafe fn write(&mut self, key: &str, value: &str) -> Result<(), &'static str> {
+        use std::io::Write;
         let req_id = req_counter.fetch_add(1, Ordering::Relaxed) as u32;
         let msg = xsd_sockmsg {
             _type: xsd_sockmsg_type::Write,
@@ -110,10 +115,11 @@ impl<'a> XenStore<'a> {
     }
 
     //Listing 8.8 in The Definitive Guide to the Xen Hypervisor
-    unsafe fn read(&mut self, key: &str) -> Result<String, &'static str> {
+    pub unsafe fn read(&mut self, key: &str) -> Result<String, &'static str> {
+        use std::io::{Write, Read};
         let req_id = req_counter.fetch_add(1, Ordering::Relaxed) as u32;
         let mut msg = xsd_sockmsg {
-            _type: xsd_sockmsg_type::Write,
+            _type: xsd_sockmsg_type::Read,
             req_id: req_id,
             tx_id: 0,
             len: (key.len() + 1) as u32
@@ -127,8 +133,9 @@ impl<'a> XenStore<'a> {
         self.interface.read(msg_slice).ok();
         if msg.req_id == req_id && msg.tx_id == 0 {
             let mut result_vec = Vec::with_capacity(msg.len as usize);
+            result_vec.resize(msg.len as usize, '\0' as u8);
             self.interface.read(result_vec.as_mut_slice()).ok();
-            Result::Ok(String::from_utf8_unchecked(result_vec))
+            Result::Ok(String::from_utf8(result_vec).ok().unwrap())
         } else {
             self.interface.ignore(msg.len as usize);
             Result::Err("Received a reply for the wrong request ID")
@@ -142,7 +149,7 @@ fn mod_ring_size(i: u32) -> u32 {
 
 #[repr(C)]
 #[allow(non_camel_case_types)]
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 struct xsd_sockmsg {
     _type: xsd_sockmsg_type,
     req_id: u32,
@@ -152,7 +159,7 @@ struct xsd_sockmsg {
 
 #[repr(u32)]
 #[allow(non_camel_case_types)]
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 enum xsd_sockmsg_type {
     Debug       = 0,
     Directory   = 1,
