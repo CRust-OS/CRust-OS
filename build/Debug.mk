@@ -22,7 +22,8 @@ dom_start: dom_create
 
 .PHONY: dom_console
 dom_console: dom_create
-	(sleep 0.1; $(XL) unpause $(DOM_ID)) & $(XL) console $(DOM_ID)
+	(sleep 0.1; $(XL) unpause $(DOM_ID)) &
+	echo -e '\e[32mStarting console - use C-] to exit\e[0m'; $(XL) console $(DOM_ID)
 
 clean: $(if $(shell $(DOM_ID)),dom_destroy)
 

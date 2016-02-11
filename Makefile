@@ -1,5 +1,7 @@
 #!/bin/bash
 
+SHELL = /bin/bash
+
 PROFILE ?= debug
 ARCH ?= x86_64
 TARGET_TRIPLE ?= x86_64-unknown-xen
