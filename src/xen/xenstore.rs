@@ -1,6 +1,5 @@
 use std::io;
 use core::*;
-use core::fmt::Write;
 use core::iter::*;
 use core::mem::*;
 use core::sync::atomic::*;
@@ -9,7 +8,6 @@ use xen::arch::mem::*;
 use xen::event_channels::*;
 use xen::start_info::start_info_page;
 use alloc::raw_vec::RawVec;
-use xen::console_io::{STDOUT};
 use collections::{String, Vec};
 
 pub static XENSTORE: RwLock<Option<XenStore<'static>>> = RwLock::new(Option::None);
