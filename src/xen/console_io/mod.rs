@@ -8,7 +8,7 @@ pub unsafe fn initialize() {
     let console = xencons_ring::CONSOLE.write();
     *console = Some (xencons_ring::Console {
         event_channel: EventChannel(start_info_page.console.domU.evtchn),
-        interface: &mut *(mfn_to_virt((*start_info_page).console.domU.mfn) as *mut _)
+        interface: &mut *(mfn_to_virt(start_info_page.console.domU.mfn) as *mut _)
     })
 }
 
