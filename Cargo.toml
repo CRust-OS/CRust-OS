@@ -11,3 +11,9 @@ path = "./mm"
 
 [dependencies.alloc]
 git = "https://github.com/phil-opp/nightly-liballoc.git"
+
+[dependencies.rustc_unicode]
+git = "https://github.com/phil-opp/nightly-librustc_unicode.git"
+
+[dependencies.collections]
+git = "https://github.com/phil-opp/nightly-libcollections.git"

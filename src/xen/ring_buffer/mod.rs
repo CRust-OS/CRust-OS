@@ -1,5 +1,5 @@
 use ::xen::arch::mem::*;
-use ::xen::event_channels::send;
+use ::xen::event_channels::*;
 
 pub trait ReadableRing {
     fn read(&mut self) {
@@ -57,8 +57,8 @@ pub trait WritableRing {
 
     }
 
-    fn write_notify(&mut self, buf : &[u8], evtchn : u32) {
+    fn write_notify(&mut self, buf : &[u8], evtchn : EventChannel) {
         self.write(buf);
-        unsafe { send(evtchn); }
+        unsafe { evtchn.notify(); }
     }
 }

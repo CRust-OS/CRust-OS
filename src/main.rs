@@ -1,4 +1,3 @@
-#![feature(ptr_as_ref)]
 #![feature(lang_items)]
 #![feature(asm)]
 #![feature(stmt_expr_attributes)]
@@ -8,6 +7,7 @@
 #![feature(alloc)]
 #![feature(braced_empty_structs)] // XXX: For now
 #![feature(start)]
+#![feature(const_fn)]
 //#![feature(core_str_ext)]
 //#![feature(ptr_as_ref)]
 #![no_std]
@@ -15,7 +15,9 @@
 extern crate rlibc;
 extern crate mm;
 extern crate alloc;
+extern crate collections;
 
+mod std;
 mod xen;
 
 pub use xen::poweroff;
@@ -47,7 +49,8 @@ pub extern fn prologue() {
         let null: *const u8 = ptr::null();
         let argv: *const *const u8 = &null;
         mm::setup();
-        let result = main(0, argv);
+        xen::console_io::initialize();
+        let _result = main(0, argv);
         ()
     }
 }

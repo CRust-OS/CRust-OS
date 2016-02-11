@@ -32,5 +32,3 @@ pub struct domU {
     pub mfn:        u64,
     pub evtchn:     u32
 }
-
-

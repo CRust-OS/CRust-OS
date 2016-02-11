@@ -8,14 +8,13 @@ OBJ = obj
 DIRTY += $(OBJ)
 BIN = bin
 DIRTY += $(BIN)
-LIB = lib
-DIRTY += $(LIB)
 TMP = tmp
 DIRTY += $(TMP)
 DEPS = deps
 DIRTY += $(DEPS)
 # Cleaned by Cargo
 TARGET = target/$(TARGET_TRIPLE)/$(PROFILE)
+TARGET_FILE = $(TARGET_TRIPLE).json
 
 # Commands
 RM = rm -rf
@@ -25,7 +24,6 @@ ECHO = @echo
 
 # Macros
 lowercase = $(shell echo ${$1,,})
-
 
 # When writing a target declaration with wildcard dependencies, caching the dependencies in a .d file means that deleting a dependency will result in rebuilding. (Wildcard dependencies usually do not pick up on deletions)
 $(DEPS)/%.d:

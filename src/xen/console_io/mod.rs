@@ -1,9 +1,24 @@
 mod xencons_ring;
 use core::fmt;
+use ::xen::arch::mem::mfn_to_virt;
+use ::xen::start_info::start_info_page;
+use ::xen::event_channels::EventChannel;
+
+pub unsafe fn initialize() {
+    let console = xencons_ring::CONSOLE.write();
+    *console = Some (xencons_ring::Console {
+        event_channel: EventChannel(start_info_page.console.domU.evtchn),
+        interface: &mut *(mfn_to_virt((*start_info_page).console.domU.mfn) as *mut _)
+    })
+}
 
 pub fn write<T>(s : T) where T : AsRef<str> {
     unsafe {
-        xencons_ring::write(s.as_ref().as_bytes());
+        xencons_ring::CONSOLE
+            .write()
+            .as_mut()
+            .unwrap()
+            .write(s.as_ref().as_bytes())
     }
 }
 
@@ -15,11 +30,3 @@ impl fmt::Write for STDOUT {
         Ok(())
     }
 }
-//unsafe fn write_hypercall(s : &[u8]) {
-    //hypercall!(i64, Command::console_io, SubCommand::write, s.len(), s.as_ptr());
-//}
-
-
-// TODO
-pub fn console_init(){}
-

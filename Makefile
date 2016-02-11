@@ -18,7 +18,7 @@ clean:
 	$(RM) $(DIRTY)
 
 # Modules (include is order-sensitive)
-include $(BUILD)/Rust.mk
 include $(BUILD)/Boot.mk
-include $(BUILD)/libcore.mk
+include $(BUILD)/Runtime.mk
+include $(BUILD)/Rust.mk
 include $(BUILD)/Debug.mk

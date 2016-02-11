@@ -1,7 +1,7 @@
 use ::xen::hypercalls::*;
 use ::xen::hypercalls::event_channel_op::*;
 
-pub struct EventChannel(u32);
+pub struct EventChannel(pub u32);
 
 impl Drop for EventChannel {
     fn drop (&mut self) {
@@ -18,14 +18,15 @@ impl Drop for EventChannel {
     }
 }
 
-
-// TODO: FIX, arg shouldn't be a u32
-pub unsafe fn send(prt : u32){
-    let mut args = send::Args { port : Port(prt) };
-    let _result = hypercall!(
-        i64,
-        Command::event_channel_op,
-        SubCommand::send,
-        &mut args as *mut _
-    );
+impl EventChannel {
+    pub unsafe fn notify(&self) {
+        let EventChannel(port) = *self;
+        let mut args = send::Args { port : Port(port) };
+        let _result = hypercall!(
+            i64,
+            Command::event_channel_op,
+            SubCommand::send,
+            &mut args as *mut _
+        );
+    }
 }

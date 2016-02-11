@@ -1,12 +1,18 @@
-use ::xen::start_info::start_info_page;
-use ::xen::event_channels::send;
-use ::xen::arch::mem::*;
+use std::sync::RwLock;
+use ::xen::event_channels::*;
 use ::xen::ring_buffer::{WritableRing,ReadableRing};
 
 type XENCONS_RING_IDX = u32;
 
+pub static CONSOLE: RwLock<Option<Console<'static>>> = RwLock::new(Option::None);
+
+pub struct Console<'a> {
+    pub interface: &'a mut xencons_interface,
+    pub event_channel: EventChannel
+}
+
 #[repr(C)]
-struct xencons_interface {
+pub struct xencons_interface {
     input       : [u8; 1024],           // renamed because 'in' is a keyword
     output      : [u8; 2048],
     in_cons     : XENCONS_RING_IDX,
@@ -51,8 +57,11 @@ impl ReadableRing for xencons_interface {
     }
 }
 
-pub unsafe fn write(s : &[u8]) {
-    let intf_ptr = mfn_to_virt((*start_info_page).console.domU.mfn) as *mut xencons_interface;
-    let intf = intf_ptr.as_mut().unwrap();
-    intf.write_notify(s, (*start_info_page).console.domU.evtchn);
+impl<'a> Console<'a> {
+    pub fn write(&mut self, s: &[u8]) {
+        unsafe {
+            self.interface.write(s);
+            self.event_channel.notify();
+        }
+    }
 }

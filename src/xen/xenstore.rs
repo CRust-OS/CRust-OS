@@ -1,4 +1,157 @@
+use std::io::*;
+use core::*;
+use core::iter::*;
+use core::mem::*;
+use core::sync::atomic::*;
+use std::sync::RwLock;
+use xen::arch::mem::*;
+use xen::event_channels::*;
+use xen::start_info::start_info_page;
+use alloc::boxed::Box;
+use alloc::raw_vec::RawVec;
+
+pub static XENSTORE: RwLock<Option<XenStore<'static>>> = RwLock::new(Option::None);
+
+const XENSTORE_RING_SIZE : usize = 1024;
+static mut req_counter : AtomicIsize = AtomicIsize::new(0);
+
+pub struct XenStore<'a> {
+    interface: &'a mut xenstore_domain_interface,
+    event_channel: EventChannel
+}
+
+#[repr(C)]
+struct xenstore_domain_interface {
+    req: [u8; XENSTORE_RING_SIZE],
+    rsp: [u8; XENSTORE_RING_SIZE],
+    req_cons: u32,
+    req_prod: u32,
+    rsp_cons: u32,
+    rsp_prod: u32
+}
+
+impl Write for xenstore_domain_interface {
+    //Listing 8.4 in The Definitive Guide to the Xen Hypervisor
+    fn write(&mut self, buf: &[u8]) -> Result<usize, &'static str> {
+        if buf.len() > XENSTORE_RING_SIZE {
+            Result::Err("Too much data!")
+        } else {
+            let mut i = self.req_prod;
+            let result = buf.len();
+
+            for &b in buf {
+                while {
+                    let data = i - self.req_cons;
+                    mb();
+                    data >= (XENSTORE_RING_SIZE as u32)
+                } {}
+                let ring_index = mod_ring_size(i) as usize;
+                self.req[ring_index] = b;
+                i = i + 1;
+            }
+
+            wmb();
+            self.req_prod = i;
+            Ok(result)
+        }
+    }
+}
+
+impl Read for xenstore_domain_interface {
+    //Listing 8.5 in The Definitive Guide to the Xen Hypervisor
+    fn read(&mut self, buf: &mut [u8]) -> Result<usize, &'static str> {
+        let mut i = self.rsp_cons;
+        let result = buf.len();
+
+        for b in buf {
+            while {
+                let data = self.rsp_prod - i;
+                mb();
+                data == 0
+            } {}
+            let ring_index = mod_ring_size(i) as usize;
+            *b = self.rsp[ring_index];
+            i = i + 1;
+        }
+
+        Ok(result)
+    }
+}
+
+impl xenstore_domain_interface {
+    //Listing 8.6 in The Definitive Guide to the Xen Hypervisor
+    fn ignore(&mut self, bytes: usize) {
+        if bytes != 0 {
+            let vec = RawVec::<u8>::with_capacity(bytes);
+            let slice = slice::from_raw_parts_mut(vec.ptr(), bytes);
+            self.read(slice);
+            vec.drop();
+        }
+    }
+}
+
+impl<'a> XenStore<'a> {
+    //Listing 8.7 in The Definitive Guide to the Xen Hypervisor
+    unsafe fn write(&mut self, key: &str, value: &str) -> Result<(), &'static str> {
+        let req_id = req_counter.fetch_add(1, Ordering::Relaxed) as u32;
+        let msg = xsd_sockmsg {
+            _type: xsd_sockmsg_type::Write,
+            req_id: req_id,
+            tx_id: 0,
+            len: (key.len() + value.len() + 2) as u32
+        };
+        let msg_slice = slice::from_raw_parts(&msg as *const _ as *const u8, size_of::<xsd_sockmsg>());
+        try!(self.interface.write(msg_slice));
+        try!(self.interface.write(key.as_bytes()));
+        try!(self.interface.write("\0".as_bytes()));
+        try!(self.interface.write(value.as_bytes()));
+        try!(self.interface.write("\0".as_bytes()));
+        self.event_channel.notify();
+        Result::Ok(())
+    }
+
+    //Listing 8.8 in The Definitive Guide to the Xen Hypervisor
+    unsafe fn read(&mut self, key: &str) -> Result<Box<str>, &'static str> {
+        let req_id = req_counter.fetch_add(1, Ordering::Relaxed) as u32;
+        let msg = xsd_sockmsg {
+            _type: xsd_sockmsg_type::Write,
+            req_id: req_id,
+            tx_id: 0,
+            len: (key.len() + 1) as u32
+        };
+        let msg_slice = slice::from_raw_parts_mut(&mut msg as *mut _ as *mut u8, size_of::<xsd_sockmsg>());
+        try!(self.interface.write(msg_slice));
+        try!(self.interface.write(key.as_bytes()));
+        try!(self.interface.write("\0".as_bytes()));
+        self.event_channel.notify();
+
+        self.interface.read(msg_slice);
+        if msg.req_id == req_id && msg.tx_id == 0 {
+            
+        } else {
+            self.interface.ignore(msg.len as usize);
+            Result::Err("Received a reply for the wrong request ID")
+        }
+    }
+}
+
+fn mod_ring_size(i: u32) -> u32 {
+    i & ((XENSTORE_RING_SIZE as u32) - 1)
+}
+
+#[repr(C)]
+#[allow(non_camel_case_types)]
+#[derive(Clone, Copy)]
+struct xsd_sockmsg {
+    _type: xsd_sockmsg_type,
+    req_id: u32,
+    tx_id: u32,
+    len: u32
+}
+
 #[repr(u32)]
+#[allow(non_camel_case_types)]
+#[derive(Clone, Copy)]
 enum xsd_sockmsg_type {
     Debug       = 0,
     Directory   = 1,
@@ -26,9 +179,6 @@ enum xsd_sockmsg_type {
     Invalid     = 0xffff /* Guaranteed to remain an invalid type */
 }
 
-struct xsd_sockmsg {
-    _type: xsd_sockmsg_type,
-    req_id: u32,
-    tx_id: u32,
-    len: u32
+unsafe fn get_store() -> *mut xenstore_domain_interface {
+    mfn_to_virt((*start_info_page).store_mfn) as *mut xenstore_domain_interface
 }
