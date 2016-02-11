@@ -1,4 +1,5 @@
 #![feature(lang_items)]
+#![feature(collections)]
 #![feature(asm)]
 #![feature(stmt_expr_attributes)]
 #![feature(type_macros)]

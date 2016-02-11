@@ -13,13 +13,11 @@ pub unsafe fn initialize() {
 }
 
 pub fn write<T>(s : T) where T : AsRef<str> {
-    unsafe {
         xencons_ring::CONSOLE
             .write()
             .as_mut()
             .unwrap()
             .write(s.as_ref().as_bytes())
-    }
 }
 
 pub struct STDOUT;

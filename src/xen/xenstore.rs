@@ -7,8 +7,8 @@ use std::sync::RwLock;
 use xen::arch::mem::*;
 use xen::event_channels::*;
 use xen::start_info::start_info_page;
-use alloc::boxed::Box;
 use alloc::raw_vec::RawVec;
+use collections::{String, Vec};
 
 pub static XENSTORE: RwLock<Option<XenStore<'static>>> = RwLock::new(Option::None);
 
@@ -80,12 +80,11 @@ impl Read for xenstore_domain_interface {
 
 impl xenstore_domain_interface {
     //Listing 8.6 in The Definitive Guide to the Xen Hypervisor
-    fn ignore(&mut self, bytes: usize) {
+    unsafe fn ignore(&mut self, bytes: usize) {
         if bytes != 0 {
             let vec = RawVec::<u8>::with_capacity(bytes);
             let slice = slice::from_raw_parts_mut(vec.ptr(), bytes);
-            self.read(slice);
-            vec.drop();
+            let _ignored = self.read(slice);
         }
     }
 }
@@ -111,9 +110,9 @@ impl<'a> XenStore<'a> {
     }
 
     //Listing 8.8 in The Definitive Guide to the Xen Hypervisor
-    unsafe fn read(&mut self, key: &str) -> Result<Box<str>, &'static str> {
+    unsafe fn read(&mut self, key: &str) -> Result<String, &'static str> {
         let req_id = req_counter.fetch_add(1, Ordering::Relaxed) as u32;
-        let msg = xsd_sockmsg {
+        let mut msg = xsd_sockmsg {
             _type: xsd_sockmsg_type::Write,
             req_id: req_id,
             tx_id: 0,
@@ -125,9 +124,11 @@ impl<'a> XenStore<'a> {
         try!(self.interface.write("\0".as_bytes()));
         self.event_channel.notify();
 
-        self.interface.read(msg_slice);
+        self.interface.read(msg_slice).ok();
         if msg.req_id == req_id && msg.tx_id == 0 {
-            
+            let mut result_vec = Vec::with_capacity(msg.len as usize);
+            self.interface.read(result_vec.as_mut_slice()).ok();
+            Result::Ok(String::from_utf8_unchecked(result_vec))
         } else {
             self.interface.ignore(msg.len as usize);
             Result::Err("Received a reply for the wrong request ID")
