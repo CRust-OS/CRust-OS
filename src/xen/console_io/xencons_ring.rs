@@ -45,7 +45,7 @@ impl<'a> io::Write for Console<'a> {
     //Listing 6.4 in The Definitive Guide to the Xen Hypervisor
     fn write(&mut self, buf: &[u8]) -> Result<usize, &'static str> {
         for b in buf {
-            if(*b == '\n' as u8) {
+            if *b == '\n' as u8 {
                 self.write_byte('\r' as u8);
                 self.write_byte('\n' as u8);
             } else {
