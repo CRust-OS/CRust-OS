@@ -25,9 +25,9 @@ dom_start: dom_create
 	$(XL) unpause $(DOM_ID)
 
 .PHONY: dom_console
-dom_console: dom_start
+dom_console:
 	@echo Starting console - use C-] to exit
-	$(XL) console $(DOM_ID)
+	$(if $(DOM_RUNNING),,$(XL) create -c crust.cfg 'name="$(DOMAIN_NAME)"' 'kernel="$(TARGET)/crust"')
 
 .PHONY: dom_%
 dom_%: var_DOMAIN_NAME

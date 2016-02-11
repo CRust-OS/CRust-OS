@@ -9,7 +9,6 @@ $(patsubst %, $(RUSTLIB_TMP)/%, $(LIBS)): $(RUSTLIB_TMP)/%:
 	git clone https://github.com/phil-opp/nightly-$(@F) $@
 
 $(patsubst %, $(RUSTLIB_TMP)/%/$(notdir $(TARGET_FILE)), $(LIBS)): $(RUSTLIB_TMP)/%/$(notdir $(TARGET_FILE)): $(RUSTLIB_TMP)/% $(TARGET_FILE)
-	echo $(@D)
 	cp $(TARGET_FILE) $@
 
 $(patsubst %, $(RUSTLIB)/%.rlib, $(filter-out libcore, $(LIBS))): $(RUSTLIB)/%.rlib: $(RUSTLIB_TMP)/% $(RUSTLIB_TMP)/%/$(notdir $(TARGET_FILE))
