@@ -1,5 +1,6 @@
 mod xencons_ring;
 use core::fmt;
+use std::io::Write;
 use ::xen::arch::mem::mfn_to_virt;
 use ::xen::start_info::start_info_page;
 use ::xen::event_channels::EventChannel;
@@ -12,12 +13,13 @@ pub unsafe fn initialize() {
     })
 }
 
-pub fn write<T>(s : T) where T : AsRef<str> {
+fn write<T>(s : T) where T : AsRef<str> {
+    let _result =
         xencons_ring::CONSOLE
             .write()
             .as_mut()
             .unwrap()
-            .write(s.as_ref().as_bytes())
+            .write(s.as_ref().as_bytes());
 }
 
 pub struct STDOUT;

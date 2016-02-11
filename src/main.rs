@@ -68,6 +68,13 @@ pub fn main(_argc: isize, _argv: *const *const u8) -> isize {
     unsafe {
         let vm_name = xen::xenstore::XENSTORE.write().as_mut().unwrap().read("name").ok().unwrap();
         let _ = writeln!(STDOUT, "Hello world {}!\r", vm_name);
+        let key = "examplekey";
+        let value = "examplevalue";
+        let wrote = xen::xenstore::XENSTORE.write().as_mut().unwrap().write(key, value);
+        let _ = writeln!(STDOUT, "Wrote!");
+        loop {}
+        let read = xen::xenstore::XENSTORE.write().as_mut().unwrap().read(key).ok().unwrap();
+        let _ = writeln!(STDOUT, "wrote {}, read {}", value, read);
     }
 
     let x = mm::__rust_allocate(1, 16);

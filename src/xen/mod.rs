@@ -1,6 +1,7 @@
 #[macro_use]
 mod arch;
 
+pub mod emergency_console;
 pub mod ring_buffer;
 mod hypercalls;
 pub mod event_channels;
@@ -9,7 +10,6 @@ pub mod start_info;
 pub mod console_io;
 pub mod xenstore;
 
-pub mod emergency_console;
 
 fn shutdown(reason: hypercalls::sched_op::shutdown::Reason) -> ! {
     use self::hypercalls::Command;

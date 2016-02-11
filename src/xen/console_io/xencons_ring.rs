@@ -1,8 +1,9 @@
+use core::mem::size_of_val;
+use std::io;
 use std::sync::RwLock;
+use xen::arch::mem;
+use xen::*;
 use ::xen::event_channels::*;
-use ::xen::ring_buffer::{WritableRing,ReadableRing};
-
-type XENCONS_RING_IDX = u32;
 
 pub static CONSOLE: RwLock<Option<Console<'static>>> = RwLock::new(Option::None);
 
@@ -11,57 +12,52 @@ pub struct Console<'a> {
     pub event_channel: EventChannel
 }
 
+const INPUT_RING_SIZE: usize = 1024;
+const OUTPUT_RING_SIZE: usize = 2048;
+
 #[repr(C)]
 pub struct xencons_interface {
-    input       : [u8; 1024],           // renamed because 'in' is a keyword
-    output      : [u8; 2048],
-    in_cons     : XENCONS_RING_IDX,
-    in_prod     : XENCONS_RING_IDX,
-    out_cons    : XENCONS_RING_IDX,
-    out_prod    : XENCONS_RING_IDX
-}
-
-impl WritableRing for xencons_interface {
-    fn output_buffer(&mut self) -> &mut [u8] {
-        &mut(self.output)
-    }
-    fn get_output_consumer_idx(&self) -> usize {
-        self.out_cons as usize
-    }
-    fn get_output_producer_idx(&self) -> usize {
-        self.out_prod as usize
-    }
-    fn set_output_consumer_idx(&mut self, out_cons: usize) {
-        self.out_cons = out_cons as u32;
-    }
-    fn set_output_producer_idx(&mut self, out_prod : usize) {
-        self.out_prod = out_prod as u32;
-    }
-}
-
-impl ReadableRing for xencons_interface {
-    fn input_buffer(&mut self) -> &mut [u8] {
-        &mut(self.input)
-    }
-    fn get_input_consumer_idx(&self) -> usize {
-        self.in_cons as usize
-    }
-    fn get_input_producer_idx(&self) -> usize {
-        self.in_prod as usize
-    }
-    fn set_input_consumer_idx(&mut self, in_cons: usize) {
-        self.in_cons = in_cons as u32;
-    }
-    fn set_input_producer_idx(&mut self, in_prod : usize) {
-        self.in_prod = in_prod as u32;
-    }
+    input       : [u8; INPUT_RING_SIZE],           // renamed because 'in' is a keyword
+    output      : [u8; OUTPUT_RING_SIZE],
+    in_cons     : u32,
+    in_prod     : u32,
+    out_cons    : u32,
+    out_prod    : u32
 }
 
 impl<'a> Console<'a> {
-    pub fn write(&mut self, s: &[u8]) {
-        unsafe {
-            self.interface.write(s);
-            self.event_channel.notify();
-        }
+    fn write_byte(&mut self, byte: u8) {
+        while {
+            let data = (self.interface.out_prod - self.interface.out_cons) as usize;
+            unsafe { self.event_channel.notify(); }
+            mem::mb();
+            data >= size_of_val(&self.interface.output)
+        } {}
+
+        let ring_index = mod_output_ring_size(self.interface.out_prod) as usize;
+        
+        self.interface.output[ring_index] = byte;
+        self.interface.out_prod = self.interface.out_prod.wrapping_add(1);
     }
+}
+
+impl<'a> io::Write for Console<'a> {
+    //Listing 6.4 in The Definitive Guide to the Xen Hypervisor
+    fn write(&mut self, buf: &[u8]) -> Result<usize, &'static str> {
+        for b in buf {
+            if(*b == '\n' as u8) {
+                self.write_byte('\r' as u8);
+                self.write_byte('\n' as u8);
+            } else {
+                self.write_byte(*b);
+            }
+        }
+        unsafe { self.event_channel.notify(); }
+
+        Ok(buf.len())
+    }
+}
+
+fn mod_output_ring_size(i: u32) -> u32 {
+    i & ((OUTPUT_RING_SIZE as u32) - 1)
 }

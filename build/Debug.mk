@@ -5,9 +5,6 @@ XL = sudo xl
 
 DOM_ID = $$($(XL) domid $(DOMAIN_NAME) 2> /dev/null)
 
-foo:
-	echo $(DOM_RUNNING)
-
 .PHONY: dom_create
 dom_create: $(TARGET)/crust crust.cfg
 	$(XL) create -p crust.cfg 'name="$(DOMAIN_NAME)"' 'kernel="$(TARGET)/crust"'
@@ -25,7 +22,7 @@ dom_console: dom_create
 	(sleep 0.1; $(XL) unpause $(DOM_ID)) &
 	echo -e '\e[32mStarting console - use C-] to exit\e[0m'; $(XL) console $(DOM_ID)
 
-clean: $(if $(shell $(DOM_ID)),dom_destroy)
+clean: $(if $(DOM_ID),dom_destroy)
 
 GDBSX_PROC = $(shell pgrep --list-full 'gdbsx' | grep "gdbsx -a $(DOM_ID)")
 GDBSX_PID = $(firstword $(GDBSX_PROC))

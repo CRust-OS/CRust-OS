@@ -12,13 +12,13 @@ use collections::{String, Vec};
 
 pub static XENSTORE: RwLock<Option<XenStore<'static>>> = RwLock::new(Option::None);
 
-const XENSTORE_RING_SIZE : usize = 1024;
-static mut req_counter : AtomicIsize = AtomicIsize::new(1);
 
 pub struct XenStore<'a> {
     interface: &'a mut xenstore_domain_interface,
     event_channel: EventChannel
 }
+
+static mut req_counter : AtomicIsize = AtomicIsize::new(1);
 
 #[repr(C)]
 struct xenstore_domain_interface {
@@ -29,6 +29,8 @@ struct xenstore_domain_interface {
     rsp_cons: u32,
     rsp_prod: u32
 }
+
+const XENSTORE_RING_SIZE : usize = 1024;
 
 impl io::Write for xenstore_domain_interface {
     //Listing 8.4 in The Definitive Guide to the Xen Hypervisor
