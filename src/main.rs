@@ -46,11 +46,14 @@ fn print_init_info(){
 #[no_mangle]
 pub extern fn prologue() {
     unsafe {
+        xen::emergency_console::print(b"prologue!\n\0");
         use core::ptr;
         let null: *const u8 = ptr::null();
         let argv: *const *const u8 = &null;
         mm::setup();
         xen::console_io::initialize();
+        xen::xenstore::initialize();
+        xen::emergency_console::print(b"end of prologue!\n\0");
         let _result = main(0, argv);
         ()
     }

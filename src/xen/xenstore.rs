@@ -180,6 +180,10 @@ enum xsd_sockmsg_type {
     Invalid     = 0xffff /* Guaranteed to remain an invalid type */
 }
 
-unsafe fn get_store() -> *mut xenstore_domain_interface {
-    mfn_to_virt((*start_info_page).store_mfn) as *mut xenstore_domain_interface
+pub unsafe fn initialize() {
+    let xenstore_ptr = XENSTORE.write();
+    *xenstore_ptr = Some (XenStore {
+        interface: &mut *(mfn_to_virt(start_info_page.store_mfn) as *mut _),
+        event_channel: EventChannel(start_info_page.store_evtchn)
+    });
 }
