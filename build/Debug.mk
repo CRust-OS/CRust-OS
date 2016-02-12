@@ -22,7 +22,7 @@ dom_console: dom_create
 	(sleep 0.1; $(XL) unpause $(DOM_ID)) &
 	echo -e '\e[32mStarting console - use C-] to exit\e[0m'; $(XL) console $(DOM_ID)
 
-clean: $(if $(DOM_ID),dom_destroy)
+clean: $(if $(shell (DOM_ID)),dom_destroy)
 
 GDBSX_PROC = $(shell pgrep --list-full 'gdbsx' | grep "gdbsx -a $(DOM_ID)")
 GDBSX_PID = $(firstword $(GDBSX_PROC))
