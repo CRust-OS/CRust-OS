@@ -2,7 +2,6 @@
 mod arch;
 
 pub mod emergency_console;
-pub mod ring_buffer;
 mod hypercalls;
 pub mod event_channels;
 mod grant_tables;
