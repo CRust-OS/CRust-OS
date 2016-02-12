@@ -1,4 +1,4 @@
-use std::io;
+use std::io::{self, Write, Read};
 use core::*;
 use core::iter::*;
 use core::mem::*;
@@ -32,11 +32,11 @@ struct xenstore_domain_interface {
 
 const XENSTORE_RING_SIZE : usize = 1024;
 
-impl io::Write for xenstore_domain_interface {
+impl Write for xenstore_domain_interface {
     //Listing 8.4 in The Definitive Guide to the Xen Hypervisor
-    fn write(&mut self, buf: &[u8]) -> Result<usize, &'static str> {
+    fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
         if buf.len() > XENSTORE_RING_SIZE {
-            Result::Err("Too much data!")
+            Result::Err(io::Error::new(io::ErrorKind::InvalidData, "Too much data!"))
         } else {
             let mut i = self.req_prod;
             let result = buf.len();
@@ -59,9 +59,9 @@ impl io::Write for xenstore_domain_interface {
     }
 }
 
-impl io::Read for xenstore_domain_interface {
+impl Read for xenstore_domain_interface {
     //Listing 8.5 in The Definitive Guide to the Xen Hypervisor
-    fn read(&mut self, buf: &mut [u8]) -> Result<usize, &'static str> {
+    fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
         let mut i = self.rsp_cons;
         let result = buf.len();
 
@@ -95,7 +95,7 @@ impl xenstore_domain_interface {
 impl<'a> XenStore<'a> {
 
     //Listing 8.7 in The Definitive Guide to the Xen Hypervisor
-    pub unsafe fn write(&mut self, key: &str, value: &str) -> Result<(), &'static str> {
+    pub unsafe fn write(&mut self, key: &str, value: &str) -> io::Result<()> {
         use std::io::Write;
         let req_id = req_counter.fetch_add(1, Ordering::Relaxed) as u32;
         let msg = xsd_sockmsg {
@@ -115,7 +115,7 @@ impl<'a> XenStore<'a> {
     }
 
     //Listing 8.8 in The Definitive Guide to the Xen Hypervisor
-    pub unsafe fn read(&mut self, key: &str) -> Result<String, &'static str> {
+    pub unsafe fn read(&mut self, key: &str) -> io::Result<String> {
         use std::io::{Write, Read};
         let req_id = req_counter.fetch_add(1, Ordering::Relaxed) as u32;
         let mut msg = xsd_sockmsg {
@@ -137,8 +137,12 @@ impl<'a> XenStore<'a> {
             self.interface.read(result_vec.as_mut_slice()).ok();
             Result::Ok(String::from_utf8(result_vec).ok().unwrap())
         } else {
+            use core::fmt::Write;
             self.interface.ignore(msg.len as usize);
-            Result::Err("Received a reply for the wrong request ID")
+            Result::Err(io::Error::new(
+                io::ErrorKind::Other,
+                format!("Received a reply for the wrong request ID (expected {}, actual {})", req_id, msg.req_id)
+            ))
         }
     }
 }

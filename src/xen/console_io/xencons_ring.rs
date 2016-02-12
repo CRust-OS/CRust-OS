@@ -2,7 +2,6 @@ use core::mem::size_of_val;
 use std::io;
 use std::sync::RwLock;
 use xen::arch::mem;
-use xen::*;
 use ::xen::event_channels::*;
 
 pub static CONSOLE: RwLock<Option<Console<'static>>> = RwLock::new(Option::None);
@@ -43,7 +42,7 @@ impl<'a> Console<'a> {
 
 impl<'a> io::Write for Console<'a> {
     //Listing 6.4 in The Definitive Guide to the Xen Hypervisor
-    fn write(&mut self, buf: &[u8]) -> Result<usize, &'static str> {
+    fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
         for b in buf {
             if *b == '\n' as u8 {
                 self.write_byte('\r' as u8);

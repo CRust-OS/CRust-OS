@@ -8,6 +8,7 @@
 #![feature(alloc)]
 #![feature(braced_empty_structs)] // XXX: For now
 #![feature(start)]
+#![feature(reflect_marker)]
 #![feature(const_fn)]
 //#![feature(core_str_ext)]
 //#![feature(ptr_as_ref)]
@@ -18,6 +19,7 @@ extern crate mm;
 extern crate alloc;
 extern crate collections;
 
+#[macro_use]
 mod std;
 mod xen;
 
@@ -32,50 +34,57 @@ extern fn eh_personality() {}
 
 #[lang = "panic_fmt"]
 #[no_mangle]
-pub extern fn rust_begin_unwind(_fmt: core::fmt::Arguments, _file_line: &(&'static str, u32)) -> ! {
-    writeln!(DEBUG, "panic_fmt!");
+pub extern fn rust_begin_unwind(args: core::fmt::Arguments, file: &'static str, line: u32) -> ! {
+    writeln!(STDOUT, "In file {} at line {} (XXX LINE COUNT IS CURRENTLY BROKEN)", file, line).unwrap();
+    writeln!(STDOUT, "{:?}", args).unwrap();
     xen::crash();
 }
 
 fn print_init_info(){
-    let _ = writeln!(STDOUT, "Magic: {}", core::str::from_utf8(&start_info_page.magic).unwrap_or("ERROR"));
-    let _ = writeln!(STDOUT, "nr_pages: {:#X}", start_info_page.nr_pages);
-    let _ = writeln!(STDOUT, "shared_info: {:#X}", start_info_page.shared_info);
+    writeln!(STDOUT, "Magic: {}", core::str::from_utf8(&start_info_page.magic).unwrap_or("ERROR")).unwrap();
+    writeln!(STDOUT, "nr_pages: {:#X}", start_info_page.nr_pages).unwrap();
+    writeln!(STDOUT, "shared_info: {:#X}", start_info_page.shared_info).unwrap();
 }
 
 
 #[no_mangle]
 pub extern fn prologue() {
     unsafe {
-        writeln!(DEBUG, "prologue!");
+        writeln!(DEBUG, "prologue!").unwrap();
         use core::ptr;
         let null: *const u8 = ptr::null();
         let argv: *const *const u8 = &null;
-        writeln!(DEBUG, "mm::setup");
+        writeln!(DEBUG, "mm::setup").unwrap();
         mm::setup();
-        writeln!(DEBUG, "xen::console_io::initialize");
+        writeln!(DEBUG, "xen::console_io::initialize").unwrap();
         xen::console_io::initialize();
-        writeln!(DEBUG, "xen::xenstore::initialize");
+        writeln!(DEBUG, "xen::xenstore::initialize").unwrap();
         xen::xenstore::initialize();
-        writeln!(DEBUG, "end of prologue!");
+        writeln!(DEBUG, "end of prologue!").unwrap();
         let _result = main(0, argv);
-        ()
     }
 }
 
 #[start]
 pub fn main(_argc: isize, _argv: *const *const u8) -> isize {
-    writeln!(DEBUG, "main!");
+    writeln!(DEBUG, "main!").unwrap();
+    let mut s = collections::String::new();
+    writeln!(STDOUT, "Growing sequences of numbers to test allocation...");
+    for i in 0 .. 1 {
+        for j in 0 .. 10 {
+            s.push(('0' as u8 + j) as char);
+            writeln!(STDOUT, "{}, {}, {}", &s, s.len(), s.as_ptr() as usize);
+        }
+    }
     unsafe {
-        let vm_name = xen::xenstore::XENSTORE.write().as_mut().unwrap().read("name").ok().unwrap();
-        let _ = writeln!(STDOUT, "Hello world {}!", vm_name);
+        let vm_name = xen::xenstore::XENSTORE.write().as_mut().unwrap().read("name").unwrap();
+        writeln!(STDOUT, "Hello world {}!", vm_name).unwrap();
         let key = "examplekey";
         let value = "examplevalue";
-        let wrote = xen::xenstore::XENSTORE.write().as_mut().unwrap().write(key, value);
-        let _ = writeln!(STDOUT, "Wrote!");
-        loop {}
-        let read = xen::xenstore::XENSTORE.write().as_mut().unwrap().read(key).ok().unwrap();
-        let _ = writeln!(STDOUT, "wrote {}, read {}", value, read);
+        xen::xenstore::XENSTORE.write().as_mut().unwrap().write(key, value).unwrap();
+        writeln!(STDOUT, "Wrote!").unwrap();
+        let read = xen::xenstore::XENSTORE.write().as_mut().unwrap().read(key).unwrap();
+        writeln!(STDOUT, "wrote {}, read {}", value, read).unwrap();
     }
 
     let x = mm::__rust_allocate(1, 16);
@@ -84,19 +93,19 @@ pub fn main(_argc: isize, _argv: *const *const u8) -> isize {
         *x = 100;
         *y = 2 * *x;
         if *x == 100 && *y == 200 {
-            let _ = writeln!(STDOUT, "Assigned Properly!");
+            writeln!(STDOUT, "Assigned Properly!").unwrap();
         }
         else {
-            writeln!(DEBUG, "Error Assigning!");
-            let _ = writeln!(STDOUT, "Error Assigning");
+            writeln!(DEBUG, "Error Assigning!").unwrap();
+            writeln!(STDOUT, "Error Assigning").unwrap();
         }
 
         if (y as usize - x as usize) == 16 {
-            let _ = writeln!(STDOUT, "Alligned Properly");
+            writeln!(STDOUT, "Alligned Properly").unwrap();
         }
         else {
-            writeln!(DEBUG, "Error Alligning!");
-            let _ = writeln!(STDOUT, "Error Alligning");
+            writeln!(DEBUG, "Error Alligning!").unwrap();
+            writeln!(STDOUT, "Error Alligning").unwrap();
         }
     }
     print_init_info();
