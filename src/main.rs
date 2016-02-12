@@ -19,7 +19,7 @@ mod xen;
 
 pub use xen::poweroff;
 pub use xen::console_io::STDOUT;
-pub use xen::sbrk;
+pub use xen::mem::sbrk;
 use xen::start_info::start_info_page;
 use core::fmt::Write;
 use alloc::boxed::Box;
@@ -27,7 +27,7 @@ use alloc::boxed::Box;
 #[lang = "eh_personality"]
 extern fn eh_personality() {}
 
-const LEN : usize = 400; //breaks at LEN=445;
+const LEN : usize = 2000;
 
 #[lang = "panic_fmt"]
 #[no_mangle]
