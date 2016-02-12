@@ -1,11 +1,11 @@
 #[inline]
-pub unsafe fn mb(){
-    asm!("mfence" : : : "memory" : "volatile");
+pub fn mb(){
+    unsafe { asm!("mfence" : : : "memory" : "volatile"); }
 }
 
 #[inline]
-pub unsafe fn wmb(){
-    asm!("sfence" : : : "memory" : "volatile");
+pub fn wmb(){
+    unsafe{ asm!("sfence" : : : "memory" : "volatile"); }
 }
 
 const PAGE_SHIFT : u64 = 12;

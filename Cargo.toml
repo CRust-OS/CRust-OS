@@ -4,10 +4,9 @@ version = "0.1.0"
 authors = ["Carl Patenaude-Poulin <carl.patenaudepoulin@mail.mcgill.ca>", "Scott Cooper <scott.cooper2@mail.mcgill.ca"]
 
 [dependencies]
-rlibc = "0.1"
+rlibc = "*"
 
 [dependencies.mm]
 path = "./mm"
 
-[dependencies.alloc]
-git = "https://github.com/phil-opp/nightly-liballoc.git"
+

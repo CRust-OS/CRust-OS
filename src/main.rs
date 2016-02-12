@@ -1,4 +1,5 @@
 #![feature(lang_items)]
+#![feature(collections)]
 #![feature(asm)]
 #![feature(stmt_expr_attributes)]
 #![feature(type_macros)]
@@ -7,6 +8,8 @@
 #![feature(alloc)]
 #![feature(braced_empty_structs)] // XXX: For now
 #![feature(start)]
+#![feature(reflect_marker)]
+#![feature(const_fn)]
 //#![feature(core_str_ext)]
 //#![feature(ptr_as_ref)]
 #![no_std]
@@ -14,12 +17,16 @@
 extern crate rlibc;
 extern crate mm;
 extern crate alloc;
+extern crate collections;
 
+#[macro_use]
+mod std;
 mod xen;
 
 pub use xen::poweroff;
 pub use xen::console_io::STDOUT;
 pub use xen::mem::sbrk;
+pub use xen::emergency_console::EMERGENCY_CONSOLE as DEBUG;
 use xen::start_info::start_info_page;
 use core::fmt::Write;
 use alloc::boxed::Box;
@@ -31,55 +38,66 @@ const LEN : usize = 2000;
 
 #[lang = "panic_fmt"]
 #[no_mangle]
-pub extern fn rust_begin_unwind(_fmt: core::fmt::Arguments, _file_line: &(&'static str, u32)) -> ! {
-    xen::emergency_console::print(b"panic_fmt!\n\0");
+pub extern fn rust_begin_unwind(args: core::fmt::Arguments, file: &'static str, line: u32) -> ! {
+    writeln!(STDOUT, "In file {} at line {} (XXX LINE COUNT IS CURRENTLY BROKEN)", file, line).unwrap();
+    writeln!(STDOUT, "{:?}", args).unwrap();
     xen::crash();
 }
 
 fn print_init_info(){
-    let _ = writeln!(STDOUT, "Magic: {}", core::str::from_utf8(&start_info_page.magic).unwrap_or("ERROR"));
-    let _ = writeln!(STDOUT, "nr_pages: {:#X}", start_info_page.nr_pages);
-    let _ = writeln!(STDOUT, "shared_info: {:#X}", start_info_page.shared_info);
+    writeln!(STDOUT, "Magic: {}", core::str::from_utf8(&start_info_page.magic).unwrap_or("ERROR")).unwrap();
+    writeln!(STDOUT, "nr_pages: {:#X}", start_info_page.nr_pages).unwrap();
+    writeln!(STDOUT, "shared_info: {:#X}", start_info_page.shared_info).unwrap();
 }
 
 
 #[no_mangle]
 pub extern fn prologue() {
-    use core::ptr;
-    let null: *const u8 = ptr::null();
-    let argv: *const *const u8 = &null;
-    let result = main(0, argv);
-    ()
+    unsafe {
+        writeln!(DEBUG, "prologue!").unwrap();
+        use core::ptr;
+        let null: *const u8 = ptr::null();
+        let argv: *const *const u8 = &null;
+        writeln!(DEBUG, "mm::setup").unwrap();
+        writeln!(DEBUG, "xen::console_io::initialize").unwrap();
+        xen::console_io::initialize();
+        writeln!(DEBUG, "xen::xenstore::initialize").unwrap();
+        xen::xenstore::initialize();
+        writeln!(DEBUG, "end of prologue!").unwrap();
+        let _result = main(0, argv);
+    }
 }
 
 #[start]
 pub fn main(_argc: isize, _argv: *const *const u8) -> isize {
-    xen::emergency_console::print(b"main!\n\0");
-    let _ = writeln!(STDOUT, "Hello world!");
+    writeln!(DEBUG, "main!").unwrap();
 
-    let x = mm::__rust_allocate(1, 16);
-    let y = mm::__rust_allocate(1, 16);
-
+    let mut s = collections::String::new();
+    writeln!(STDOUT, "Growing sequences of numbers to test allocation...");
+    for i in 0 .. 1 {
+        for j in 0 .. 10 {
+            s.push(('0' as u8 + j) as char);
+            writeln!(STDOUT, "{}, {}, {}", &s, s.len(), s.as_ptr() as usize);
+        }
+    }
     unsafe {
-        *x = 100;
-        *y = 2 * *x;
-        if *x == 100 && *y == 200 {
-            xen::emergency_console::print(b"Assigned Properly!\n\0");
-            let _ = writeln!(STDOUT, "Assigned Properly!");
-        }
-        else {
-            xen::emergency_console::print(b"Error Assigning!\n\0");
-            let _ = writeln!(STDOUT, "Error Assigning");
-        }
+        let vm_name = xen::xenstore::XENSTORE.write().as_mut().unwrap().read("name").unwrap();
+        writeln!(STDOUT, "Hello world {}!", vm_name).unwrap();
+        let key = "examplekey";
+        let value = "examplevalue";
+        xen::xenstore::XENSTORE.write().as_mut().unwrap().write(key, value).unwrap();
+        writeln!(STDOUT, "Wrote!").unwrap();
+//        let read = xen::xenstore::XENSTORE.write().as_mut().unwrap().read(key).unwrap();
+//        writeln!(STDOUT, "wrote {}, read {}", value, read).unwrap();
     }
 
     let x = Box::new(12);
 
     if *x == 12 {
-        xen::emergency_console::print(b"Box Worked!\n\0");
+        writeln!(STDOUT, "Box Worked").unwrap();
     }
     else {
-        xen::emergency_console::print(b"Box Failed!\n\0");
+        writeln!(STDOUT, "Box Failed").unwrap();
     }
     
     let mut a = Box::new([0; LEN]);
@@ -89,7 +107,7 @@ pub fn main(_argc: isize, _argv: *const *const u8) -> isize {
 
     for i in 1..LEN {
         if a[i] != i {
-            xen::emergency_console::print(b"Memory Error\n\0");
+            writeln!(STDOUT, "Error in Memory").unwrap();
         }
     }
 

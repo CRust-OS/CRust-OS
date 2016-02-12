@@ -2,15 +2,9 @@
 name = "crust"
 version = "0.1.0"
 dependencies = [
- "alloc 0.1.0 (git+https://github.com/phil-opp/nightly-liballoc.git)",
  "mm 0.0.1",
  "rlibc 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
-
-[[package]]
-name = "alloc"
-version = "0.1.0"
-source = "git+https://github.com/phil-opp/nightly-liballoc.git#71c379617138d6b847dd296f1c51ea04d8975b93"
 
 [[package]]
 name = "mm"

@@ -8,7 +8,7 @@ pub struct start_info {
     pub nr_pages:           u64,
     pub shared_info:        u64,
     pub flags:              u32,
-    pub store_pfn_t:        u64,
+    pub store_mfn:          u64,
     pub store_evtchn:       u32,
     pub console:            console,           // XXX: Rust currently doens't provde a nice way to handle C unions, right now, only doing the domU version
     pub pt_base:            u64,
@@ -32,5 +32,3 @@ pub struct domU {
     pub mfn:        u64,
     pub evtchn:     u32
 }
-
-

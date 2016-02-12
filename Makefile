@@ -1,5 +1,7 @@
 #!/bin/bash
 
+SHELL = /bin/bash
+
 PROFILE ?= debug
 ARCH ?= x86_64
 TARGET_TRIPLE ?= x86_64-unknown-xen
@@ -19,7 +21,7 @@ clean:
 
 # Modules (include is order-sensitive)
 include $(BUILD)/malloc.mk
-include $(BUILD)/Rust.mk
 include $(BUILD)/Boot.mk
-include $(BUILD)/libcore.mk
+include $(BUILD)/Runtime.mk
+include $(BUILD)/Rust.mk
 include $(BUILD)/Debug.mk

@@ -1,13 +1,13 @@
 #[macro_use]
 mod arch;
 
+pub mod emergency_console;
 mod hypercalls;
 pub mod event_channels;
 mod grant_tables;
 pub mod start_info;
 pub mod console_io;
-
-pub mod emergency_console;
+pub mod xenstore;
 pub mod mem;
 
 fn shutdown(reason: hypercalls::sched_op::shutdown::Reason) -> ! {
