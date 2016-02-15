@@ -6,7 +6,7 @@ XL = sudo xl
 DOM_ID = $$($(XL) domid $(DOMAIN_NAME) 2> /dev/null)
 
 .PHONY: dom_create
-dom_create: $(TARGET)/crust crust.cfg
+dom_create: $(TARGET)/crust crust.cfg var_DOMAIN_NAME
 	$(XL) create -p crust.cfg 'name="$(DOMAIN_NAME)"' 'kernel="$(TARGET)/crust"'
 
 .PHONY: dom_destroy
