@@ -25,12 +25,16 @@ mod xen;
 
 pub use xen::poweroff;
 pub use xen::console_io::STDOUT;
+pub use xen::mem::sbrk;
 pub use xen::emergency_console::EMERGENCY_CONSOLE as DEBUG;
 use xen::start_info::start_info_page;
 use core::fmt::Write;
+use alloc::boxed::Box;
 
 #[lang = "eh_personality"]
 extern fn eh_personality() {}
+
+const LEN : usize = 2000;
 
 #[lang = "panic_fmt"]
 #[no_mangle]
@@ -55,7 +59,6 @@ pub extern fn prologue() {
         let null: *const u8 = ptr::null();
         let argv: *const *const u8 = &null;
         writeln!(DEBUG, "mm::setup").unwrap();
-        mm::setup();
         writeln!(DEBUG, "xen::console_io::initialize").unwrap();
         xen::console_io::initialize();
         writeln!(DEBUG, "xen::xenstore::initialize").unwrap();
@@ -68,6 +71,7 @@ pub extern fn prologue() {
 #[start]
 pub fn main(_argc: isize, _argv: *const *const u8) -> isize {
     writeln!(DEBUG, "main!").unwrap();
+
     let mut s = collections::String::new();
     writeln!(STDOUT, "Growing sequences of numbers to test allocation...");
     for i in 0 .. 1 {
@@ -83,32 +87,32 @@ pub fn main(_argc: isize, _argv: *const *const u8) -> isize {
         let value = "examplevalue";
         xen::xenstore::XENSTORE.write().as_mut().unwrap().write(key, value).unwrap();
         writeln!(STDOUT, "Wrote!").unwrap();
-        let read = xen::xenstore::XENSTORE.write().as_mut().unwrap().read(key).unwrap();
-        writeln!(STDOUT, "wrote {}, read {}", value, read).unwrap();
+//        let read = xen::xenstore::XENSTORE.write().as_mut().unwrap().read(key).unwrap();
+//        writeln!(STDOUT, "wrote {}, read {}", value, read).unwrap();
     }
 
-    let x = mm::__rust_allocate(1, 16);
-    let y = mm::__rust_allocate(1, 16);
-    unsafe {
-        *x = 100;
-        *y = 2 * *x;
-        if *x == 100 && *y == 200 {
-            writeln!(STDOUT, "Assigned Properly!").unwrap();
-        }
-        else {
-            writeln!(DEBUG, "Error Assigning!").unwrap();
-            writeln!(STDOUT, "Error Assigning").unwrap();
-        }
+    let x = Box::new(12);
 
-        if (y as usize - x as usize) == 16 {
-            writeln!(STDOUT, "Alligned Properly").unwrap();
-        }
-        else {
-            writeln!(DEBUG, "Error Alligning!").unwrap();
-            writeln!(STDOUT, "Error Alligning").unwrap();
+    if *x == 12 {
+        writeln!(STDOUT, "Box Worked").unwrap();
+    }
+    else {
+        writeln!(STDOUT, "Box Failed").unwrap();
+    }
+    
+    let mut a = Box::new([0; LEN]);
+    for i in 1..LEN {
+        a[i] = i;
+    }
+
+    for i in 1..LEN {
+        if a[i] != i {
+            writeln!(STDOUT, "Error in Memory").unwrap();
         }
     }
+
     print_init_info();
+
     0
 }
 

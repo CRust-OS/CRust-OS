@@ -8,7 +8,7 @@ mod grant_tables;
 pub mod start_info;
 pub mod console_io;
 pub mod xenstore;
-
+pub mod mem;
 
 fn shutdown(reason: hypercalls::sched_op::shutdown::Reason) -> ! {
     use self::hypercalls::Command;

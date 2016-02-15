@@ -20,6 +20,7 @@ clean:
 	$(RM) $(DIRTY)
 
 # Modules (include is order-sensitive)
+include $(BUILD)/malloc.mk
 include $(BUILD)/Boot.mk
 include $(BUILD)/Runtime.mk
 include $(BUILD)/Rust.mk

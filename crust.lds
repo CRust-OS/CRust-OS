@@ -5,7 +5,7 @@ ENTRY(_start)
 SECTIONS {
     .bss : ALIGN(0x1000) {
         STACK_TOP = .;
-        . += 0xF000;
+        . += 0x50000;
         STACK_BOTTOM = .;
         HYPERCALL_PAGE = .;
         . += 0x1000;
@@ -24,4 +24,6 @@ SECTIONS {
         *(.note.Xen);
     }
     HEAP = .;
+    . += 0x0100;
+    HEAD_END =.;
 }

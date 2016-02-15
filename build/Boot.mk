@@ -14,8 +14,8 @@ $(OBJ)/%.o: $(OBJ)/%.s
 	$(AS) $(AS_ARGS) -o $@ $<
 
 ASM_FILES = $(shell find $(BOOT) -name "*.S")
-OBJ_FILES = $(patsubst $(BOOT)/%.S,$(OBJ)/%.o,$(ASM_FILES))
-$(DEPS)/$(BIN)/boot.o.d: $(ASM_FILES)
+OBJ_FILES = $(patsubst $(BOOT)/%.S,$(OBJ)/%.o,$(ASM_FILES)) $(MALLOC_OUT)
+$(DEPS)/$(BIN)/boot.o.d: $(ASM_FILES) 
 	$(MKDIR) $(@D)
 	$(ECHO) "$(BIN)/boot.o: $(OBJ_FILES)" > $@
 -include $(DEPS)/$(BIN)/boot.o.d
