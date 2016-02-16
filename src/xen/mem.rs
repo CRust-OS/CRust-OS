@@ -28,7 +28,3 @@ pub extern fn sbrk(incr: usize) -> *const u8 {
     }
 }
 
-#[no_mangle]
-pub extern fn setup() {
-    sbrk(0);
-}

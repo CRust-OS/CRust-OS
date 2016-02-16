@@ -34,7 +34,7 @@ use alloc::boxed::Box;
 #[lang = "eh_personality"]
 extern fn eh_personality() {}
 
-const LEN : usize = 2000;
+const LEN : usize = 3000;
 
 #[lang = "panic_fmt"]
 #[no_mangle]
@@ -74,7 +74,7 @@ pub fn main(_argc: isize, _argv: *const *const u8) -> isize {
 
     let mut s = collections::String::new();
     writeln!(STDOUT, "Growing sequences of numbers to test allocation...");
-    for i in 0 .. 1 {
+    for _ in 0 .. 1 {
         for j in 0 .. 10 {
             s.push(('0' as u8 + j) as char);
             writeln!(STDOUT, "{}, {}, {}", &s, s.len(), s.as_ptr() as usize);
@@ -111,6 +111,7 @@ pub fn main(_argc: isize, _argv: *const *const u8) -> isize {
         }
     }
 
+    writeln!(DEBUG, "done!").unwrap();
     print_init_info();
 
     0

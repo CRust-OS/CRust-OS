@@ -5,11 +5,6 @@
 #![feature(lang_items)]
 #![allocator]
 
-extern {
-    fn sbrk(incr: usize) -> *const u8;
-}
-
-
 #[no_mangle]
 ///! error number, used by dlmalloc familu
 pub static mut __errno_location : usize = 0;
@@ -26,7 +21,7 @@ extern {
 ///! Currently, the pointer can't be freed
 pub extern fn __rust_allocate(size: usize, _align: usize) -> *mut u8 {
     unsafe {
-        dlmalloc(size + _align - size % _align)
+        dlmalloc(size)
     }
 }
 
@@ -47,6 +42,7 @@ pub extern fn __rust_reallocate(ptr: *mut u8, _old_size: usize, size: usize,  _a
 }
 
 #[no_mangle]
+#[allow(unused_variables)]
 pub extern fn __rust_reallocate_inplace(_ptr: *mut u8, old_size: usize, _size: usize, _align: usize)
     -> usize {
         unsafe {
