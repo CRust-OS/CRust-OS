@@ -73,11 +73,11 @@ pub fn main(_argc: isize, _argv: *const *const u8) -> isize {
     writeln!(DEBUG, "main!").unwrap();
 
     let mut s = collections::String::new();
-    writeln!(STDOUT, "Growing sequences of numbers to test allocation...");
+    writeln!(STDOUT, "Growing sequences of numbers to test allocation...").unwrap();
     for _ in 0 .. 1 {
         for j in 0 .. 10 {
             s.push(('0' as u8 + j) as char);
-            writeln!(STDOUT, "{}, {}, {}", &s, s.len(), s.as_ptr() as usize);
+            writeln!(STDOUT, "{}, {}, {}", &s, s.len(), s.as_ptr() as usize).unwrap();
         }
     }
     unsafe {
