@@ -105,7 +105,6 @@ impl<'a> XenStore<'a> {
             tx_id: 0,
             len: len
         };
-        writeln!(STDOUT, "Sending {:?}: {:?}", msg, params).unwrap();
         let msg_slice = slice::from_raw_parts(&msg as *const _ as *const u8, size_of::<xsd_sockmsg>());
         try!(self.interface.write(msg_slice));
 
@@ -126,7 +125,6 @@ impl<'a> XenStore<'a> {
                 result_vec.resize(response.len as usize, 0);
                 self.interface.read(result_vec.as_mut_slice()).ok();
                 let result = String::from_utf8(result_vec).unwrap();
-                writeln!(STDOUT, "Receiving {:?}: {:?}", response, result).unwrap();
                 Result::Ok((response.type_, result))
             }
             (_, 0) => {
