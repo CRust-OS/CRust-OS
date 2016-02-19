@@ -3,6 +3,7 @@
 RUSTLIB_TMP = $(TMP)/rustlib
 RUSTLIB ?= $(HOME)/.multirust/toolchains/nightly/lib/rustlib/$(TARGET_TRIPLE)/lib
 LIBS = libcore liballoc librustc_unicode libcollections
+RUNTIME = $(patsubst %, $(RUSTLIB)/%.rlib, $(LIBS))
 
 $(patsubst %, $(RUSTLIB_TMP)/%, $(LIBS)): $(RUSTLIB_TMP)/%:
 	$(MKDIR) $(@D)
