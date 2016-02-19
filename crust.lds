@@ -4,9 +4,9 @@ ENTRY(_start)
 
 SECTIONS {
     .bss : ALIGN(0x1000) {
-        STACK_TOP = .;
-        . += 0x50000;
         STACK_BOTTOM = .;
+        . += 0x50000;
+        STACK_TOP = .;
         HYPERCALL_PAGE = .;
         . += 0x1000;
         *(.bss);
