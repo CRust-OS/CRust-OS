@@ -9,7 +9,6 @@ use xen::event_channels::*;
 use xen::start_info::start_info_page;
 use alloc::raw_vec::RawVec;
 use collections::{String, Vec};
-use xen::console_io::STDOUT;
 
 pub static XENSTORE: RwLock<Option<XenStore<'static>>> = RwLock::new(Option::None);
 
