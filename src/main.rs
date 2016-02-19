@@ -81,14 +81,9 @@ pub fn main(_argc: isize, _argv: *const *const u8) -> isize {
         }
     }
     unsafe {
-        let vm_name = xen::xenstore::XENSTORE.write().as_mut().unwrap().read("name").unwrap();
+        let xenstore = xen::xenstore::XENSTORE.write().as_mut().unwrap();
+        let vm_name = xenstore.read("name").unwrap().unwrap();
         writeln!(STDOUT, "Hello world {}!", vm_name).unwrap();
-        let key = "examplekey";
-        let value = "examplevalue";
-        xen::xenstore::XENSTORE.write().as_mut().unwrap().write(key, value).unwrap();
-        writeln!(STDOUT, "Wrote!").unwrap();
-//        let read = xen::xenstore::XENSTORE.write().as_mut().unwrap().read(key).unwrap();
-//        writeln!(STDOUT, "wrote {}, read {}", value, read).unwrap();
     }
 
     let x = Box::new(12);
