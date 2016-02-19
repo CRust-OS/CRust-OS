@@ -80,10 +80,13 @@ pub fn main(_argc: isize, _argv: *const *const u8) -> isize {
             writeln!(STDOUT, "{}, {}, {}", &s, s.len(), s.as_ptr() as usize).unwrap();
         }
     }
+
     unsafe {
         let xenstore = xen::xenstore::XENSTORE.write().as_mut().unwrap();
         let vm_name = xenstore.read("name").unwrap().unwrap();
         writeln!(STDOUT, "Hello world {}!", vm_name).unwrap();
+        let perms = xenstore.get_permissions("name").unwrap();
+        writeln!(STDOUT, "Can name be changed: {}", perms).unwrap();
     }
 
     let x = Box::new(12);

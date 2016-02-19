@@ -147,7 +147,6 @@ impl<'a> XenStore<'a> {
     //Listing 8.7 in The Definitive Guide to the Xen Hypervisor
     pub unsafe fn write(&mut self, key: &str, value: &str) -> io::Result<()> {
         use core::fmt::Write;
-
         let result = try!(self.send(xsd_sockmsg_type::Write, &[key, value]));
         
         match result {
@@ -160,7 +159,7 @@ impl<'a> XenStore<'a> {
             (xsd_sockmsg_type::Error, s) => {
                 Result::Err(io::Error::new(
                     io::ErrorKind::Other,
-                    format!("Generic xenstore error {}", s)
+                    format!("Generic xenstore write error {}", s)
                 ))
             }
             _ => { Result::Ok(()) }
@@ -169,11 +168,33 @@ impl<'a> XenStore<'a> {
 
     //Listing 8.8 in The Definitive Guide to the Xen Hypervisor
     pub unsafe fn read(&mut self, key: &str) -> io::Result<Option<String>> {
+        use core::fmt::Write;
         let result = try!(self.send(xsd_sockmsg_type::Read, &[key]));
 
         match result {
             (xsd_sockmsg_type::Error, ref s) if s == "ENOENT\0" => { Result::Ok(None) }
+            (xsd_sockmsg_type::Error, s) => {
+                Result::Err(io::Error::new(
+                    io::ErrorKind::Other,
+                    format!("Generic xenstore read error {}", s)
+                ))
+            }
             (_, s) => { Result::Ok(Some(s)) }
+        }
+    }
+
+    pub unsafe fn get_permissions(&mut self, key: &str) -> io::Result<String> {
+        use core::fmt::Write;
+        let result = try!(self.send(xsd_sockmsg_type::GetPerms, &[key]));
+
+        match result {
+            (xsd_sockmsg_type::Error, s) => {
+                Result::Err(io::Error::new(
+                    io::ErrorKind::Other,
+                    format!("Generic xenstore read error {}", s)
+                ))
+            }
+            (_, s) => { Result::Ok(s) }
         }
     }
 }
