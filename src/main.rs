@@ -18,6 +18,7 @@ extern crate rlibc;
 extern crate mm;
 extern crate alloc;
 extern crate collections;
+extern crate nodrop;
 
 #[macro_use]
 mod std;
@@ -72,6 +73,12 @@ pub extern fn prologue() {
 pub fn main(_argc: isize, _argv: *const *const u8) -> isize {
     writeln!(DEBUG, "main!").unwrap();
 
+    let _ = if let Err(e) = xen::grant_tables::init_grant_table() {
+        writeln!(STDOUT, "Error initializing grant table: {}", e)
+    } else {
+        writeln!(STDOUT, "Initialized grant table")
+    };
+
     let mut s = collections::String::new();
     writeln!(STDOUT, "Growing sequences of numbers to test allocation...");
     for _ in 0 .. 1 {
@@ -80,6 +87,8 @@ pub fn main(_argc: isize, _argv: *const *const u8) -> isize {
             writeln!(STDOUT, "{}, {}, {}", &s, s.len(), s.as_ptr() as usize);
         }
     }
+
+
     unsafe {
         let vm_name = xen::xenstore::XENSTORE.write().as_mut().unwrap().read("name").unwrap();
         writeln!(STDOUT, "Hello world {}!", vm_name).unwrap();
@@ -111,7 +120,7 @@ pub fn main(_argc: isize, _argv: *const *const u8) -> isize {
         }
     }
 
-    writeln!(DEBUG, "done!").unwrap();
+    let _ = writeln!(DEBUG, "done!").unwrap();
     print_init_info();
 
     0

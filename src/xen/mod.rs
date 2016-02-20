@@ -4,7 +4,7 @@ mod arch;
 pub mod emergency_console;
 mod hypercalls;
 pub mod event_channels;
-mod grant_tables;
+pub mod grant_tables;
 pub mod start_info;
 pub mod console_io;
 pub mod xenstore;

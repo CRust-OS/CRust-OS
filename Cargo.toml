@@ -9,4 +9,6 @@ rlibc = "*"
 [dependencies.mm]
 path = "./mm"
 
-
+[dependencies.nodrop]
+version = "0.1.6"
+default-features = false
