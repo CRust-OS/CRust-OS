@@ -80,24 +80,20 @@ pub fn main(_argc: isize, _argv: *const *const u8) -> isize {
     };
 
     let mut s = collections::String::new();
-    writeln!(STDOUT, "Growing sequences of numbers to test allocation...");
+    writeln!(STDOUT, "Growing sequences of numbers to test allocation...").unwrap();
     for _ in 0 .. 1 {
         for j in 0 .. 10 {
             s.push(('0' as u8 + j) as char);
-            writeln!(STDOUT, "{}, {}, {}", &s, s.len(), s.as_ptr() as usize);
+            writeln!(STDOUT, "{}, {}, {}", &s, s.len(), s.as_ptr() as usize).unwrap();
         }
     }
 
-
     unsafe {
-        let vm_name = xen::xenstore::XENSTORE.write().as_mut().unwrap().read("name").unwrap();
+        let xenstore = xen::xenstore::XENSTORE.write().as_mut().unwrap();
+        let vm_name = xenstore.read("name").unwrap().unwrap();
         writeln!(STDOUT, "Hello world {}!", vm_name).unwrap();
-        let key = "examplekey";
-        let value = "examplevalue";
-        xen::xenstore::XENSTORE.write().as_mut().unwrap().write(key, value).unwrap();
-        writeln!(STDOUT, "Wrote!").unwrap();
-//        let read = xen::xenstore::XENSTORE.write().as_mut().unwrap().read(key).unwrap();
-//        writeln!(STDOUT, "wrote {}, read {}", value, read).unwrap();
+        let perms = xenstore.get_permissions("name").unwrap();
+        writeln!(STDOUT, "Can name be changed: {}", perms).unwrap();
     }
 
     let x = Box::new(12);

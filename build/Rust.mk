@@ -10,8 +10,8 @@ RUST_FILES = $(shell find $(SRC) -name "*.rs")
 $(DEPS)/$(TARGET)/crust.d: $(RUST_FILES)
 -include $(DEPS)/$(TARGET)/crust.d
 
-$(TARGET)/crust: $(CARGO_DEPS) $(BIN)/boot.o $(TMP)/runtime
+$(TARGET)/crust: $(CARGO_DEPS) $(BIN)/boot.o $(RUNTIME)
 	$(MKDIR) $(@D)
-	$(warning if the following fails with "error: can't find crate for `core`" or "the crate `core` has been compiled with ...", you need to `multirust update` and `make runtime`.)
+	$(warning if the following fails with "error: can't find crate for `core`" or "the crate `core` has been compiled with ...", you need to `multirust update` and `make clean-runtime`.)
 	$(CARGO) rustc $(CARGO_ARGS) -- $(RUSTC_ARGS)
 	@[ -e $@ ] && touch $@ # Cargo doesn't always update timestamp

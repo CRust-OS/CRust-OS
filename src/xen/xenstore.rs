@@ -9,6 +9,7 @@ use xen::event_channels::*;
 use xen::start_info::start_info_page;
 use alloc::raw_vec::RawVec;
 use collections::{String, Vec};
+use xen::console_io::STDOUT;
 
 pub static XENSTORE: RwLock<Option<XenStore<'static>>> = RwLock::new(Option::None);
 
@@ -93,56 +94,105 @@ impl xenstore_domain_interface {
 }
 
 impl<'a> XenStore<'a> {
-
-    //Listing 8.7 in The Definitive Guide to the Xen Hypervisor
-    pub unsafe fn write(&mut self, key: &str, value: &str) -> io::Result<()> {
-        use std::io::Write;
+    unsafe fn send(&mut self, type_: xsd_sockmsg_type, params: &[&str]) -> io::Result<(xsd_sockmsg_type, String)> {
+        use core::fmt::Write;
         let req_id = req_counter.fetch_add(1, Ordering::Relaxed) as u32;
+        // params are passed null-terminated
+        let len = params.iter().fold (0, |acc, &x| acc + x.len() + 1) as u32;
         let msg = xsd_sockmsg {
-            _type: xsd_sockmsg_type::Write,
+            type_: type_,
             req_id: req_id,
             tx_id: 0,
-            len: (key.len() + value.len() + 2) as u32
+            len: len
         };
         let msg_slice = slice::from_raw_parts(&msg as *const _ as *const u8, size_of::<xsd_sockmsg>());
         try!(self.interface.write(msg_slice));
-        try!(self.interface.write(key.as_bytes()));
-        try!(self.interface.write("\0".as_bytes()));
-        try!(self.interface.write(value.as_bytes()));
-        try!(self.interface.write("\0".as_bytes()));
+
+        for p in params {
+            try!(self.interface.write(p.as_bytes()));
+            try!(self.interface.write("\0".as_bytes()));
+        }
+
         self.event_channel.notify();
-        Result::Ok(())
+
+        let mut response: xsd_sockmsg = uninitialized();
+        let response_slice = slice::from_raw_parts_mut(&mut response as *mut _ as *mut u8, size_of::<xsd_sockmsg>());
+        try!(self.interface.read(response_slice));
+        
+        match (response.req_id, response.tx_id) {
+            (req_id, 0) if req_id == msg.req_id => {
+                let mut result_vec = Vec::with_capacity(response.len as usize);
+                result_vec.resize(response.len as usize, 0);
+                self.interface.read(result_vec.as_mut_slice()).ok();
+                let result = String::from_utf8(result_vec).unwrap();
+                Result::Ok((response.type_, result))
+            }
+            (_, 0) => {
+                Result::Err(io::Error::new(
+                    io::ErrorKind::Other,
+                    format!("Received a reply with a non-zero transaction ID (expected 0, actual {})",  msg.req_id)
+                ))
+            }
+            (req_id, _) => {
+                Result::Err(io::Error::new(
+                    io::ErrorKind::Other,
+                    format!("Received a reply for the wrong request ID (expected {}, actual {})", req_id, msg.req_id)
+                ))
+            }
+        }
+    }
+
+    //Listing 8.7 in The Definitive Guide to the Xen Hypervisor
+    pub unsafe fn write(&mut self, key: &str, value: &str) -> io::Result<()> {
+        use core::fmt::Write;
+        let result = try!(self.send(xsd_sockmsg_type::Write, &[key, value]));
+        
+        match result {
+            (xsd_sockmsg_type::Error, ref s) if s == "EACCES\0" => {
+                Result::Err(io::Error::new(
+                    io::ErrorKind::PermissionDenied,
+                    format!("Can't write to key {}: access denied", key)
+                ))
+            }
+            (xsd_sockmsg_type::Error, s) => {
+                Result::Err(io::Error::new(
+                    io::ErrorKind::Other,
+                    format!("Generic xenstore write error {}", s)
+                ))
+            }
+            _ => { Result::Ok(()) }
+        }
     }
 
     //Listing 8.8 in The Definitive Guide to the Xen Hypervisor
-    pub unsafe fn read(&mut self, key: &str) -> io::Result<String> {
-        use std::io::{Write, Read};
-        let req_id = req_counter.fetch_add(1, Ordering::Relaxed) as u32;
-        let mut msg = xsd_sockmsg {
-            _type: xsd_sockmsg_type::Read,
-            req_id: req_id,
-            tx_id: 0,
-            len: (key.len() + 1) as u32
-        };
-        let msg_slice = slice::from_raw_parts_mut(&mut msg as *mut _ as *mut u8, size_of::<xsd_sockmsg>());
-        try!(self.interface.write(msg_slice));
-        try!(self.interface.write(key.as_bytes()));
-        try!(self.interface.write("\0".as_bytes()));
-        self.event_channel.notify();
+    pub unsafe fn read(&mut self, key: &str) -> io::Result<Option<String>> {
+        use core::fmt::Write;
+        let result = try!(self.send(xsd_sockmsg_type::Read, &[key]));
 
-        self.interface.read(msg_slice).ok();
-        if msg.req_id == req_id && msg.tx_id == 0 {
-            let mut result_vec = Vec::with_capacity(msg.len as usize);
-            result_vec.resize(msg.len as usize, '\0' as u8);
-            self.interface.read(result_vec.as_mut_slice()).ok();
-            Result::Ok(String::from_utf8(result_vec).ok().unwrap())
-        } else {
-            use core::fmt::Write;
-            self.interface.ignore(msg.len as usize);
-            Result::Err(io::Error::new(
-                io::ErrorKind::Other,
-                format!("Received a reply for the wrong request ID (expected {}, actual {})", req_id, msg.req_id)
-            ))
+        match result {
+            (xsd_sockmsg_type::Error, ref s) if s == "ENOENT\0" => { Result::Ok(None) }
+            (xsd_sockmsg_type::Error, s) => {
+                Result::Err(io::Error::new(
+                    io::ErrorKind::Other,
+                    format!("Generic xenstore read error {}", s)
+                ))
+            }
+            (_, s) => { Result::Ok(Some(s)) }
+        }
+    }
+
+    pub unsafe fn get_permissions(&mut self, key: &str) -> io::Result<String> {
+        use core::fmt::Write;
+        let result = try!(self.send(xsd_sockmsg_type::GetPerms, &[key]));
+
+        match result {
+            (xsd_sockmsg_type::Error, s) => {
+                Result::Err(io::Error::new(
+                    io::ErrorKind::Other,
+                    format!("Generic xenstore read error {}", s)
+                ))
+            }
+            (_, s) => { Result::Ok(s) }
         }
     }
 }
@@ -155,7 +205,7 @@ fn mod_ring_size(i: u32) -> u32 {
 #[allow(non_camel_case_types)]
 #[derive(Clone, Copy, Debug)]
 struct xsd_sockmsg {
-    _type: xsd_sockmsg_type,
+    type_: xsd_sockmsg_type,
     req_id: u32,
     tx_id: u32,
     len: u32

@@ -3,6 +3,7 @@
 RUSTLIB_TMP = $(TMP)/rustlib
 RUSTLIB ?= $(HOME)/.multirust/toolchains/nightly/lib/rustlib/$(TARGET_TRIPLE)/lib
 LIBS = libcore liballoc librustc_unicode libcollections
+RUNTIME = $(patsubst %, $(RUSTLIB)/%.rlib, $(LIBS))
 
 $(patsubst %, $(RUSTLIB_TMP)/%, $(LIBS)): $(RUSTLIB_TMP)/%:
 	$(MKDIR) $(@D)
@@ -23,6 +24,9 @@ $(RUSTLIB)/liballoc.rlib:         $(RUSTLIB)/libcore.rlib
 $(RUSTLIB)/librustc_unicode.rlib: $(RUSTLIB)/libcore.rlib
 $(RUSTLIB)/libcollections.rlib:   $(RUSTLIB)/liballoc.rlib $(RUSTLIB)/librustc_unicode.rlib
 
-$(TMP)/runtime: $(patsubst %, $(RUSTLIB)/%.rlib, $(LIBS))
-	$(MKDIR) $(@D)
-	@touch $@
+.PHONY: runtime
+runtime: $(patsubst %, $(RUSTLIB)/%.rlib, $(LIBS))
+
+.PHONY: clean-runtime
+clean-runtime:
+	rm -rf $(patsubst %, $(RUSTLIB)/%.rlib, $(LIBS))

@@ -1,5 +1,3 @@
-use xen::console_io::STDOUT;
-use core::fmt::Write;
 use nodrop::NoDrop;
 use core::mem;
 use core::ops::{Deref, DerefMut};

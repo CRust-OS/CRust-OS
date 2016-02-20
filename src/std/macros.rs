@@ -1,4 +1,3 @@
-use collections::String;
 #[macro_export]
 macro_rules! format {
     ($fmt:expr, $($args:tt)*) => {
