@@ -3,7 +3,7 @@ name = "crust"
 version = "0.1.0"
 dependencies = [
  "mm 0.0.1",
- "rlibc 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rlibc 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -12,6 +12,6 @@ version = "0.0.1"
 
 [[package]]
 name = "rlibc"
-version = "0.1.5"
+version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
