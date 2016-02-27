@@ -3,7 +3,11 @@
 CARGO = cargo
 CARGO_ARGS += --target $(TARGET_TRIPLE)
 RUSTC_ARGS += -Z no-landing-pads
-CARGO_DEPS += $(TARGET_FILE) crust.lds
+
+CARGO_DEPS += $(TARGET_FILE)
+CARGO_DEPS += crust.lds
+CARGO_DEPS += Cargo.toml
+CARGO_DEPS += Cargo.lock
 
 # Caching libcrust.a dependencies; see build/Utils.mk
 RUST_FILES = $(shell find $(SRC) -name "*.rs")

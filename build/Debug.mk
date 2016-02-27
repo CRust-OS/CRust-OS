@@ -10,8 +10,10 @@ dom_create: $(TARGET)/crust crust.cfg var_DOMAIN_NAME
 	$(XL) create -p crust.cfg 'name="$(DOMAIN_NAME)"' 'kernel="$(TARGET)/crust"'
 
 .PHONY: dom_destroy
-dom_destroy: var_DOMAIN_NAME
-	$(XL) destroy $(DOM_ID)
+dom_destroy:
+	$(if $(DOMAIN_NAME), $(if $(shell echo $(DOM_ID)), $(XL) destroy $(DOM_ID)))
+
+clean: dom_destroy
 
 .PHONY: dom_start
 dom_start: dom_create
@@ -22,7 +24,6 @@ dom_console: dom_create
 	(sleep 0.1; $(XL) unpause $(DOM_ID)) &
 	echo -e '\e[32mStarting console - use C-] to exit\e[0m'; $(XL) console $(DOM_ID)
 
-clean: $(if $(DOMAIN_NAME),$(if $(shell echo $(DOM_ID)), dom_destroy))
 
 GDBSX_PROC = $(shell pgrep --list-full 'gdbsx' | grep "gdbsx -a $(DOM_ID)")
 GDBSX_PID = $(firstword $(GDBSX_PROC))

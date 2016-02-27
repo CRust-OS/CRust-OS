@@ -5,6 +5,7 @@ authors = ["Carl Patenaude-Poulin <carl.patenaudepoulin@mail.mcgill.ca>", "Scott
 
 [dependencies]
 rlibc = "*"
+x86 = "*"
 
 [dependencies.mm]
 path = "./mm"
