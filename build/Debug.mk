@@ -34,7 +34,7 @@ gdbsx_start: dom_create var_DOMAIN_NAME
 
 .PHONY: gdbsx_stop
 gdbsx_stop:
-	$(if $(GDBSX_PROC),kill $(GDBSX_PID))
+	$(if $(GDBSX_PROC),sudo kill $(GDBSX_PID))
 
 .PHONY: gdb
 gdb: gdbsx_start

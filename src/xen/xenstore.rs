@@ -6,36 +6,24 @@ use core::sync::atomic::*;
 use std::sync::RwLock;
 use xen::arch::mem::*;
 use xen::event_channels::*;
-use xen::start_info::start_info_page;
+use xen::ffi::xenstore::*;
 use alloc::raw_vec::RawVec;
 use collections::{String, Vec};
 
-pub static XENSTORE: RwLock<Option<XenStore<'static>>> = RwLock::new(Option::None);
+pub static XENSTORE: RwLock<Option<XenStore>> = RwLock::new(Option::None);
 
 
-pub struct XenStore<'a> {
-    interface: &'a mut xenstore_domain_interface,
+pub struct XenStore {
+    interface: xenstore_domain_interface,
     event_channel: EventChannel
 }
 
 static mut req_counter : AtomicIsize = AtomicIsize::new(1);
 
-#[repr(C)]
-struct xenstore_domain_interface {
-    req: [u8; XENSTORE_RING_SIZE],
-    rsp: [u8; XENSTORE_RING_SIZE],
-    req_cons: u32,
-    req_prod: u32,
-    rsp_cons: u32,
-    rsp_prod: u32
-}
-
-const XENSTORE_RING_SIZE : usize = 1024;
-
 impl Write for xenstore_domain_interface {
     //Listing 8.4 in The Definitive Guide to the Xen Hypervisor
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
-        if buf.len() > XENSTORE_RING_SIZE {
+        if buf.len() > self.req.len() {
             Result::Err(io::Error::new(io::ErrorKind::InvalidData, "Too much data!"))
         } else {
             let mut i = self.req_prod;
@@ -45,7 +33,7 @@ impl Write for xenstore_domain_interface {
                 while {
                     let data = i - self.req_cons;
                     mb();
-                    data >= (XENSTORE_RING_SIZE as u32)
+                    data >= (self.req.len() as u32)
                 } {}
                 let ring_index = mod_ring_size(i) as usize;
                 self.req[ring_index] = b;
@@ -92,7 +80,7 @@ impl xenstore_domain_interface {
     }
 }
 
-impl<'a> XenStore<'a> {
+impl XenStore {
     unsafe fn send(&mut self, type_: xsd_sockmsg_type, params: &[&str]) -> io::Result<(xsd_sockmsg_type, String)> {
         use core::fmt::Write;
         let req_id = req_counter.fetch_add(1, Ordering::Relaxed) as u32;
@@ -196,54 +184,10 @@ impl<'a> XenStore<'a> {
     }
 }
 
-fn mod_ring_size(i: u32) -> u32 {
-    i & ((XENSTORE_RING_SIZE as u32) - 1)
-}
-
-#[repr(C)]
-#[allow(non_camel_case_types)]
-#[derive(Clone, Copy, Debug)]
-struct xsd_sockmsg {
-    type_: xsd_sockmsg_type,
-    req_id: u32,
-    tx_id: u32,
-    len: u32
-}
-
-#[repr(u32)]
-#[allow(non_camel_case_types)]
-#[derive(Clone, Copy, Debug)]
-enum xsd_sockmsg_type {
-    Debug       = 0,
-    Directory   = 1,
-    Read        = 2,
-    GetPerms    = 3,
-    Watch       = 4,
-    Unwatch     = 5,
-    TransactionStart = 6,
-    TransactionEnd = 7,
-    Introduce   = 8,
-    Release     = 9,
-    GetDomainPath = 10,
-    Write       = 11,
-    Mkdir       = 12,
-    Rm          = 13,
-    SetPerms    = 14,
-    WatchEvent  = 15,
-    Error       = 16,
-    IsDomainIntroduced = 17,
-    Resume      = 18,
-    SetTarget   = 19,
-    Restrict    = 20,
-    ResetWatches  = 21,
-
-    Invalid     = 0xffff /* Guaranteed to remain an invalid type */
-}
-
-pub unsafe fn initialize() {
+pub unsafe fn initialize(interface: xenstore_domain_interface, event_channel: EventChannel) {
     let xenstore_ptr = XENSTORE.write();
     *xenstore_ptr = Some (XenStore {
-        interface: &mut *(mfn_to_virt(start_info_page.store_mfn) as *mut _),
-        event_channel: EventChannel(start_info_page.store_evtchn)
+        interface: interface,
+        event_channel: event_channel
     });
 }
