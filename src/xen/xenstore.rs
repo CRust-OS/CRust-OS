@@ -4,7 +4,7 @@ use core::iter::*;
 use core::mem::*;
 use core::sync::atomic::*;
 use std::sync::RwLock;
-use xen::arch::mem::*;
+use xen::ffi::mem::*;
 use xen::event_channels::*;
 use xen::ffi::xenstore::*;
 use alloc::raw_vec::RawVec;

@@ -1,6 +1,3 @@
-#[macro_use]
-mod arch;
-
 pub mod emergency_console;
 mod ffi;
 pub mod event_channels;
@@ -11,6 +8,7 @@ pub mod mem;
 use core::fmt;
 use core::fmt::Write;
 use core::str;
+use std::ops::DerefMove;
 pub use xen::ffi::start_info::*;
 
 use xen::ffi::hypercalls::sched_op;
@@ -74,8 +72,8 @@ pub unsafe fn initialize(info: StartInfoPage) {
     writeln!(DEBUG, "nr_pages: {}", nr_pages).unwrap();
     //writeln!(DEBUG, "shared_info: {}", shared_info).unwrap();
     writeln!(DEBUG, "console::initialize").unwrap();
-    console::initialize(console_mfn.deref(), console_evtchn);
+    console::initialize(console_mfn.deref_move().deref_move(), console_evtchn);
     writeln!(DEBUG, "xen::xenstore::initialize").unwrap();
-    xenstore::initialize(store_mfn.deref(), store_evtchn);
+    xenstore::initialize(store_mfn.deref_move().deref_move(), store_evtchn);
     writeln!(DEBUG, "end of prologue!").unwrap();
 }

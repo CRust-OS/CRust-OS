@@ -5,12 +5,12 @@ GDB = rust-gdb
 DOM_ID = $(shell echo $$($(XL) domid $(DOMAIN_NAME) 2> /dev/null))
 
 .PHONY: dom_create
-dom_create: $(OUT_DIR)/crust crust.cfg var_DOMAIN_NAME
+dom_create: $(OUT_DIR)/crust crust.cfg var_DOMAIN_NAME dom_destroy
 	$(if $(DOM_ID),,$(XL) create -p crust.cfg 'name="$(DOMAIN_NAME)"' 'kernel="$<"')
 
 .PHONY: dom_destroy
 dom_destroy:
-	$(if $(DOMAIN_NAME), $(if $(DOM_ID),$(XL) destroy $(DOM_ID)))
+	$(if $(DOMAIN_NAME), $(if $(DOM_ID),-$(XL) destroy $(DOM_ID)))
 
 clean: dom_destroy
 
@@ -34,12 +34,12 @@ GDBSX_PID = $(firstword $(GDBSX_PROC))
 GDBSX_PROC_PORT = $(lastword $(GDBSX_PROC))
 
 .PHONY: gdbsx_start
-gdbsx_start: dom_create var_DOMAIN_NAME var_GDBSX_PORT
+gdbsx_start: dom_create gdbsx_stop var_DOMAIN_NAME var_GDBSX_PORT
 	$(if $(GDBSX_PROC),,(sudo gdbsx -a $(DOM_ID) 64 $(GDBSX_PORT) > /dev/null &))
 
 .PHONY: gdbsx_stop
 gdbsx_stop:
-	$(if $(GDBSX_PROC), sudo kill $(GDBSX_PID))
+	$(if $(GDBSX_PROC), -sudo kill $(GDBSX_PID))
 
 clean: gdbsx_stop
 

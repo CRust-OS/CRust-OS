@@ -2,7 +2,7 @@ use core::mem::size_of_val;
 use std::io;
 use std::io::Write;
 use std::sync::RwLock;
-use xen::arch::mem;
+use xen::ffi::mem;
 use xen::event_channels::*;
 use xen::ffi::console::*;
 

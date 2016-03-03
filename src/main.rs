@@ -17,6 +17,8 @@ extern crate rlibc;
 extern crate mm;
 extern crate alloc;
 extern crate collections;
+#[macro_use]
+extern crate x86;
 
 #[macro_use]
 mod std;
@@ -31,12 +33,14 @@ use core::fmt::Write;
 use alloc::boxed::Box;
 
 #[lang = "eh_personality"]
-extern fn eh_personality() {
+unsafe extern fn eh_personality() {
+    int!(3);
     xen::crash();
 }
 
 #[lang = "eh_unwind_resume"]
-extern fn eh_unwind_resume(_args: *mut u8) {
+unsafe extern fn eh_unwind_resume(_args: *mut u8) {
+    int!(3);
     xen::crash();
 }
 
@@ -54,15 +58,11 @@ pub extern fn rust_begin_unwind(args: core::fmt::Arguments, file: &'static str, 
 pub extern fn prologue(start_info_page : *const StartInfoPage) {
     unsafe {
         use core::ptr;
-        write!(DEBUG, "1234{}\n", 5678).unwrap();
-        /*
-        write!(DEBUG, "start_info_page at {}, {:o}\n", 1234, start_info_page as usize).unwrap();
         let page = ptr::read(start_info_page);
         xen::initialize(page);
         let null: *const u8 = ptr::null();
         let argv: *const *const u8 = &null;
         let _result = main(0, argv);
-        */
     }
 }
 

@@ -1,7 +1,9 @@
 use core::fmt;
-use core::ptr;
-//use core::ops::{Deref, DerefMut};
 use core::marker::PhantomData;
+
+#[macro_use]
+mod arch;
+pub use self::arch::*;
 
 pub mod console;
 pub mod hypercalls;
@@ -43,6 +45,8 @@ pub struct XenGuestHandle<T>(*mut T);
 
 #[repr(C)]
 pub struct MachineFrameNumber<T>(u64, PhantomData<T>);
+#[repr(C)]
+pub struct GuestPhysicalFrameNumber<T>(u64, PhantomData<T>);
 
 impl<T> fmt::Debug for MachineFrameNumber<T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -50,40 +54,9 @@ impl<T> fmt::Debug for MachineFrameNumber<T> {
     }
 }
 
-/*
-// XXX review, extract, and document
-impl<T> Deref for MachineFrameNumber<T> {
-    type Target = T;
-    fn deref(&self) -> &T {
-        let &MachineFrameNumber(page_number, _) = self;
-        unsafe {
-            let ptr = (page_number << 12) as usize as *const T;
-            &*ptr
-        }
-    }
-}
-
-// XXX review, extract, and document
-impl<T> DerefMut for MachineFrameNumber<T> {
-    fn deref_mut(&mut self) -> &mut T {
-        let &mut MachineFrameNumber(page_number, _) = self;
-        unsafe {
-            let ptr = (page_number << 12) as usize as *mut T;
-            &mut *ptr
-        }
-    }
-}
-*/
-
-// XXX review, extract, and document
-// TODO switch to DerefMove once it becomes available
-impl<T> MachineFrameNumber<T> {
-    pub fn deref(self) -> T {
-        let MachineFrameNumber(page_number, _) = self;
-        let ptr = (page_number << 12) as usize as *mut T;
-        unsafe {
-            ptr::read(ptr)
-        }
+impl<T> fmt::Debug for GuestPhysicalFrameNumber<T> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "GuestPhysicalFrameNumber ({:?})", self.0)
     }
 }
 
