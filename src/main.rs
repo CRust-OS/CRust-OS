@@ -31,10 +31,14 @@ use core::fmt::Write;
 use alloc::boxed::Box;
 
 #[lang = "eh_personality"]
-extern fn eh_personality() {}
+extern fn eh_personality() {
+    xen::crash();
+}
 
 #[lang = "eh_unwind_resume"]
-extern fn eh_unwind_resume(_args: *mut u8) {}
+extern fn eh_unwind_resume(_args: *mut u8) {
+    xen::crash();
+}
 
 const LEN : usize = 3000;
 
@@ -50,7 +54,7 @@ pub extern fn rust_begin_unwind(args: core::fmt::Arguments, file: &'static str, 
 pub extern fn prologue(start_info_page : *const StartInfoPage) {
     unsafe {
         use core::ptr;
-        write!(DEBUG, "Debugging write: {}\n", 1234).unwrap();
+        write!(DEBUG, "1234{}\n", 5678).unwrap();
         /*
         write!(DEBUG, "start_info_page at {}, {:o}\n", 1234, start_info_page as usize).unwrap();
         let page = ptr::read(start_info_page);
