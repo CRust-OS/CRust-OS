@@ -18,3 +18,9 @@ $(TARGET)/crust: $(CARGO_DEPS) $(BIN)/boot.o $(RUNTIME)
 	$(warning if the following fails with "error: can't find crate for `core`" or "the crate `core` has been compiled with ...", you need to `multirust update` and `make clean-runtime`.)
 	$(CARGO) build $(CARGO_ARGS)
 	@[ -e $@ ] && touch $@ # Cargo doesn't always update timestamp
+
+.PHONY: cargo-clean
+cargo-clean:
+	$(CARGO) clean
+
+clean: cargo-clean

@@ -72,7 +72,7 @@ pub extern fn prologue() {
 
 #[start]
 pub fn main(_argc: isize, _argv: *const *const u8) -> isize {
-    writeln!(DEBUG, "main!").unwrap();
+    writeln!(STDOUT, "main!").unwrap();
 
     let mut s = collections::String::new();
     writeln!(STDOUT, "Growing sequences of numbers to test allocation...").unwrap();

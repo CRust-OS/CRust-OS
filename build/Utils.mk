@@ -1,5 +1,16 @@
 # Compilers
-$(CC) = gcc
+CC = gcc
+CPP = cpp
+AS = as
+AR = ar
+LD = ld
+TARGET_FILE = $(TARGET_TRIPLE).json
+
+# Commands
+RM = rm -rf
+MKDIR = @mkdir -p
+WGET = wget --no-verbose
+ECHO = @echo
 
 # Source folders
 SRC = src
@@ -15,15 +26,15 @@ TMP = tmp
 DIRTY += $(TMP)
 DEPS = deps
 DIRTY += $(DEPS)
-# Cleaned by Cargo
-TARGET = target/$(TARGET_TRIPLE)/$(PROFILE)
-TARGET_FILE = $(TARGET_TRIPLE).json
 
-# Commands
-RM = rm -rf
-MKDIR = @mkdir -p
-WGET = wget --no-verbose
-ECHO = @echo
+# Cleaned by Cargo - don't mark dirty
+TARGET = target/$(TARGET_TRIPLE)/$(PROFILE)
+
+.PHONY: clean-dirty-folders
+clean-dirty-folders:
+	$(RM) $(DIRTY)
+
+clean: clean-dirty-folders
 
 # Macros
 lowercase = $(shell echo ${$1,,})
@@ -31,8 +42,9 @@ lowercase = $(shell echo ${$1,,})
 # When writing a target declaration with wildcard dependencies, caching the dependencies in a .d file means that deleting a dependency will result in rebuilding. (Wildcard dependencies usually do not pick up on deletions)
 $(DEPS)/%.d:
 	$(MKDIR) $(@D)
-	@echo "$*: $^" > $@
+	$(ECHO) "$*: $^" > $@
 
+# Expect variable to be defined
 .PHONY: var_%
 var_%:
 	$(if $($*),,$(error Usage: make $*=... [OPTIONS] [TARGET]))
