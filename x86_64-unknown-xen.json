@@ -18,6 +18,8 @@
     "pre-link-args": [ "-Tcrust.lds", "-nostdlib", "bin/boot.o" ],
     "linker-is-gnu": true,
     "has-rpath": false,
+    "disable-redzone": true,		 
+    "eliminate-frame-pointer": true,
     "no-compiler-rt": true,
     "no-default-libraries": true,
     "position-independent-executables": false,
