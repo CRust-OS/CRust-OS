@@ -45,7 +45,6 @@ impl fmt::Write for EMERGENCY_CONSOLE {
 
         if i != 0 {
             buffer[i] = '\0' as u8;
-            i += 1;
             EMERGENCY_CONSOLE::notify(&buffer, i);
         }
         Ok(())
