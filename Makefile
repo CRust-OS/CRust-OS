@@ -4,6 +4,7 @@ SHELL = /bin/bash
 
 PROFILE ?= debug
 TARGET_TRIPLE ?= x86_64-unknown-xen
+OUT_DIR = target/$(TARGET_TRIPLE)/$(PROFILE)
 
 # Macros, constants, etc.
 include build/Utils.mk
@@ -12,9 +13,11 @@ include build/Utils.mk
 .SECONDARY:
 
 .PHONY: all
-all: $(TARGET)/crust
+all: $(OUT_DIR)/crust
 
 .PHONY: clean
+clean:
+	$(RM) $(DIRTY)
 
 # Modules (include is order-sensitive)
 include $(BUILD)/malloc.mk

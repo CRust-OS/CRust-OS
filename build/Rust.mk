@@ -10,12 +10,12 @@ CARGO_DEPS += Cargo.lock
 
 # Caching libcrust.a dependencies; see build/Utils.mk
 RUST_FILES = $(shell find $(SRC) -name "*.rs")
-$(DEPS)/$(TARGET)/crust.d: $(RUST_FILES)
--include $(DEPS)/$(TARGET)/crust.d
+$(DEPS)/$(OUT_DIR)/crust.d: $(RUST_FILES)
+-include $(DEPS)/$(OUT_DIR)/crust.d
 
-$(TARGET)/crust: $(CARGO_DEPS) $(BIN)/boot.o $(RUNTIME)
+$(OUT_DIR)/crust: $(CARGO_DEPS) $(BIN)/boot.o $(RUNTIME)
 	$(MKDIR) $(@D)
-	$(warning if the following fails with "error: can't find crate for `core`" or "the crate `core` has been compiled with ...", you need to `multirust update` and `make clean-runtime`.)
+	$(ECHO) 'Warning: if the following fails with "error: can'"'"'t find crate for `core`" or "the crate `core` has been compiled with ...", you need to `multirust update` and `make clean-runtime`.'
 	$(CARGO) build $(CARGO_ARGS)
 	@[ -e $@ ] && touch $@ # Cargo doesn't always update timestamp
 

@@ -5,8 +5,8 @@ GDB = rust-gdb
 DOM_ID = $(shell echo $$($(XL) domid $(DOMAIN_NAME) 2> /dev/null))
 
 .PHONY: dom_create
-dom_create: $(TARGET)/crust crust.cfg var_DOMAIN_NAME
-	$(if $(DOM_ID),,$(XL) create -p crust.cfg 'name="$(DOMAIN_NAME)"' 'kernel="$(TARGET)/crust"')
+dom_create: $(OUT_DIR)/crust crust.cfg var_DOMAIN_NAME
+	$(if $(DOM_ID),,$(XL) create -p crust.cfg 'name="$(DOMAIN_NAME)"' 'kernel="$<"')
 
 .PHONY: dom_destroy
 dom_destroy:
@@ -21,7 +21,7 @@ dom_start: dom_create
 .PHONY: dom_console
 dom_console: dom_create
 	(sleep 0.1; $(XL) unpause $(DOM_ID)) &
-	$(ECHO) -e '\e[32mStarting console - use C-] to exit\e[0m'; $(XL) console $(DOM_ID)
+	$(ECHO) '\e[32mStarting console - use C-] to exit\e[0m'; $(XL) console $(DOM_ID)
 
 
 GDBSX_PROC = $(shell pgrep --list-full 'gdbsx' | grep '$(GDBSX_PORT)$$')
@@ -40,4 +40,4 @@ clean: gdbsx_stop
 
 .PHONY: gdb
 gdb: gdbsx_start
-	$(GDB) -ex "target remote localhost:$(GDBSX_PROC_PORT)"
+	$(GDB) -tui -ex "target remote localhost:$(GDBSX_PROC_PORT)"

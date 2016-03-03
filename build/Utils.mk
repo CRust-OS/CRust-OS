@@ -10,7 +10,7 @@ TARGET_FILE = $(TARGET_TRIPLE).json
 RM = rm -rf
 MKDIR = @mkdir -p
 WGET = wget --no-verbose
-ECHO = @echo
+ECHO = @echo -e
 
 # Source folders
 SRC = src
@@ -26,15 +26,6 @@ TMP = tmp
 DIRTY += $(TMP)
 DEPS = deps
 DIRTY += $(DEPS)
-
-# Cleaned by Cargo - don't mark dirty
-TARGET = target/$(TARGET_TRIPLE)/$(PROFILE)
-
-.PHONY: clean-dirty-folders
-clean-dirty-folders:
-	$(RM) $(DIRTY)
-
-clean: clean-dirty-folders
 
 # Macros
 lowercase = $(shell echo ${$1,,})
