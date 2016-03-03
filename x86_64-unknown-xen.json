@@ -1,17 +1,26 @@
 {
     "llvm-target": "x86_64-unknown-xen",
-    "target-endian": "little",
-    "target-pointer-width": "64",
-    "os": "xen",
     "arch": "x86_64",
-    "pre-link-args": [ "-Tcrust.lds", "-nostdlib" ],
-    "post-link-args": [ "bin/boot.o" ],
-    "cpu": "x86-64",
+    "vendor": "unknown",
+    "os": "xen",
+    "env": "",
+
+    "target-pointer-width": "64",
+    "target-endian": "little",
+
     "features": "-mmx,-sse,-sse2,-sse3,-ssse3,-sse4.1,-sse4.2,-3dnow,-3dnowa,-avx,-avx2",
-    "disable-redzone": true,
-    "eliminate-frame-pointer": true,
+
+    "executables": true,
+    "dynamic-linking": false,
+    "has-elf-tls": false,
+    "custom-unwind-resume": true,
+
+    "pre-link-args": [ "-Tcrust.lds", "-nostdlib", "bin/boot.o" ],
     "linker-is-gnu": true,
+    "has-rpath": false,
     "no-compiler-rt": true,
-    "archive-format": "gnu",
-    "executables": true
+    "no-default-libraries": true,
+    "position-independent-executables": false,
+    "relocation-model": "static",
+    "code-model": "kernel"
 }

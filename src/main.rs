@@ -6,7 +6,6 @@
 #![feature(associated_consts)]
 #![feature(allocator)]
 #![feature(alloc)]
-#![feature(braced_empty_structs)] // XXX: For now
 #![feature(start)]
 #![feature(reflect_marker)]
 #![feature(const_fn)]
@@ -33,6 +32,9 @@ use alloc::boxed::Box;
 
 #[lang = "eh_personality"]
 extern fn eh_personality() {}
+
+#[lang = "eh_unwind_resume"]
+extern fn eh_unwind_resume(_args: *mut u8) {}
 
 const LEN : usize = 3000;
 
