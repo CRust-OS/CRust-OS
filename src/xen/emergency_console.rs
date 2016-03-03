@@ -36,12 +36,10 @@ impl fmt::Write for DEBUG {
             }
         }
 
-        if i != 0 {
-            buffer[i] = '\0' as u8;
-            i += 1;
-            let to_write = &buffer[..i];
-            write(to_write);
-        }
+        buffer[i] = '\0' as u8;
+        i += 1;
+        let to_write = &buffer[..i];
+        write(to_write);
         Ok(())
     }
 }

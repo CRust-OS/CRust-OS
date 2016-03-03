@@ -5,7 +5,7 @@ use super::*;
 pub struct StartInfoPage {
     pub magic:              [u8; 32],
     pub nr_pages:           u64,
-    pub shared_info:        u64,
+    pub shared_info:        MachineFrameNumber<shared_info::SharedInfoPage>,
     pub flags:              u32,
     pub store_mfn:          MachineFrameNumber<xenstore::xenstore_domain_interface>,
     pub store_evtchn:       EventChannel,

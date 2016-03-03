@@ -72,7 +72,7 @@ pub unsafe fn initialize(info: StartInfoPage) {
     writeln!(DEBUG, "prologue!").unwrap();
     writeln!(DEBUG, "Magic: {}", str::from_utf8(&magic).unwrap_or("ERROR")).unwrap();
     writeln!(DEBUG, "nr_pages: {}", nr_pages).unwrap();
-    writeln!(DEBUG, "shared_info: {}", shared_info).unwrap();
+    //writeln!(DEBUG, "shared_info: {}", shared_info).unwrap();
     writeln!(DEBUG, "console::initialize").unwrap();
     console::initialize(console_mfn.deref(), console_evtchn);
     writeln!(DEBUG, "xen::xenstore::initialize").unwrap();

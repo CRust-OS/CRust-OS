@@ -28,7 +28,6 @@ pub use xen::mem::sbrk;
 pub use xen::DEBUG;
 use xen::StartInfoPage;
 use core::fmt::Write;
-use core::ptr;
 use alloc::boxed::Box;
 
 #[lang = "eh_personality"]
@@ -50,13 +49,16 @@ pub extern fn rust_begin_unwind(args: core::fmt::Arguments, file: &'static str, 
 #[no_mangle]
 pub extern fn prologue(start_info_page : *const StartInfoPage) {
     unsafe {
-        writeln!(DEBUG, "start_info_page at {}, {:o}", 1234, start_info_page as usize).unwrap();
+        use core::ptr;
+        write!(DEBUG, "Debugging write: {}\n", 1234).unwrap();
+        /*
+        write!(DEBUG, "start_info_page at {}, {:o}\n", 1234, start_info_page as usize).unwrap();
         let page = ptr::read(start_info_page);
         xen::initialize(page);
-        use core::ptr;
         let null: *const u8 = ptr::null();
         let argv: *const *const u8 = &null;
         let _result = main(0, argv);
+        */
     }
 }
 

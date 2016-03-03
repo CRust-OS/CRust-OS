@@ -23,6 +23,11 @@ dom_console: dom_create
 	(sleep 0.1; $(XL) unpause $(DOM_ID)) &
 	$(ECHO) '\e[32mStarting console - use C-] to exit\e[0m'; $(XL) console $(DOM_ID)
 
+.PHONY: dom_emergency_console
+dom_emergency_console: dom_create
+	(sleep 0.1; $(XL) unpause $(DOM_ID)) &
+	tail -f /var/log/xen/console/hypervisor.log
+
 
 GDBSX_PROC = $(shell pgrep --list-full 'gdbsx' | grep '$(GDBSX_PORT)$$')
 GDBSX_PID = $(firstword $(GDBSX_PROC))
@@ -40,4 +45,4 @@ clean: gdbsx_stop
 
 .PHONY: gdb
 gdb: gdbsx_start
-	$(GDB) -tui -ex "target remote localhost:$(GDBSX_PROC_PORT)"
+	$(GDB) -tui -ex "target remote localhost:$(GDBSX_PORT)"
