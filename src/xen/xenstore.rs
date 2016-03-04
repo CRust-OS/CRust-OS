@@ -10,11 +10,14 @@ use xen::ffi::xenstore::*;
 use alloc::raw_vec::RawVec;
 use collections::{String, Vec};
 
-pub static XENSTORE: RwLock<Option<XenStore>> = RwLock::new(Option::None);
+pub static XENSTORE: RwLock<Option<XenStore<'static>>> = RwLock::new(Option::None);
 
+pub fn initialize(xenstore: &'static mut xenstore_domain_interface, event_channel: EventChannel) {
+    *(XENSTORE.write()) = Some(XenStore {interface: xenstore, event_channel: event_channel})
+}
 
-pub struct XenStore {
-    interface: xenstore_domain_interface,
+pub struct XenStore<'a> {
+    interface: &'a mut xenstore_domain_interface,
     event_channel: EventChannel
 }
 
@@ -80,7 +83,7 @@ impl xenstore_domain_interface {
     }
 }
 
-impl XenStore {
+impl<'a> XenStore<'a> {
     unsafe fn send(&mut self, type_: xsd_sockmsg_type, params: &[&str]) -> io::Result<(xsd_sockmsg_type, String)> {
         use core::fmt::Write;
         let req_id = req_counter.fetch_add(1, Ordering::Relaxed) as u32;
@@ -100,7 +103,7 @@ impl XenStore {
             try!(self.interface.write("\0".as_bytes()));
         }
 
-        self.event_channel.notify();
+        let _result = self.event_channel.notify();
 
         let mut response: xsd_sockmsg = uninitialized();
         let response_slice = slice::from_raw_parts_mut(&mut response as *mut _ as *mut u8, size_of::<xsd_sockmsg>());
@@ -182,12 +185,4 @@ impl XenStore {
             (_, s) => { Result::Ok(s) }
         }
     }
-}
-
-pub unsafe fn initialize(interface: xenstore_domain_interface, event_channel: EventChannel) {
-    let xenstore_ptr = XENSTORE.write();
-    *xenstore_ptr = Some (XenStore {
-        interface: interface,
-        event_channel: event_channel
-    });
 }

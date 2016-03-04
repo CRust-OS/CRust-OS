@@ -2,7 +2,7 @@ use core::fmt;
 use core::marker::PhantomData;
 
 #[macro_use]
-mod arch;
+pub mod arch;
 pub use self::arch::*;
 
 pub mod console;
@@ -50,10 +50,6 @@ impl<T> fmt::Debug for GuestPhysicalFrameNumber<T> {
         write!(f, "GuestPhysicalFrameNumber ({:?})", self.0)
     }
 }
-
-#[derive(Debug)]
-#[repr(C)]
-pub struct PageFrameNumber(u64);
 
 #[derive(Debug)]
 #[repr(C)]

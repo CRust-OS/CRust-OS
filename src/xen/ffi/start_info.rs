@@ -16,7 +16,7 @@ pub struct StartInfoPage {
     pub mod_start:          u64,
     pub mod_len:            u64,
     pub cmd_line:           [u8; 1024],
-    pub first_p2m_pfn:      GuestPhysicalFrameNumber<*const usize>,
+    pub first_p2m_pfn:      GuestPhysicalFrameNumber<*const u64>,
     pub nr_p2m_frames:      u64,
 }
 

@@ -1,5 +1,5 @@
-use core::ops::DerefMut;
+use core::ops::Deref;
 
-pub trait DerefMove : DerefMut {
+pub trait DerefMove : Deref {
     fn deref_move(self) -> Self::Target;
 }

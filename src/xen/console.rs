@@ -1,3 +1,4 @@
+use core::fmt;
 use core::mem::size_of_val;
 use std::io;
 use std::io::Write;
@@ -6,18 +7,40 @@ use xen::ffi::mem;
 use xen::event_channels::*;
 use xen::ffi::console::*;
 
-pub static CONSOLE: RwLock<Option<Console>> = RwLock::new(Option::None);
+static CONSOLE: RwLock<Option<Console<'static>>> = RwLock::new(Option::None);
 
-pub struct Console {
-    pub interface: xencons_interface,
-    pub event_channel: EventChannel
+pub fn initialize(console: &'static mut xencons_interface, event_channel: EventChannel) {
+    *(CONSOLE.write()) = Some(Console { interface: console, event_channel: event_channel})
 }
 
-impl Console {
-    fn write_byte(&mut self, byte: u8) {
+pub struct STDOUT;
+
+impl fmt::Write for STDOUT {
+    fn write_str(&mut self, s: &str) -> fmt::Result {
+        use std::io::Write;
+        let result =
+            CONSOLE
+                .write()
+                .as_mut()
+                .unwrap()
+                .write(s.as_bytes());
+        match result {
+            Ok(_) => { Result::Ok(()) }
+            Err(_) => { Result::Err(fmt::Error) }
+        }
+    }
+}
+
+pub struct Console<'a> {
+    interface: &'a mut xencons_interface,
+    event_channel: EventChannel
+}
+
+impl<'a> Console<'a> {
+     fn write_byte(&mut self, byte: u8) {
         while {
             let data = (self.interface.out_prod - self.interface.out_cons) as usize;
-            unsafe { self.event_channel.notify(); }
+            let _result = unsafe { self.event_channel.notify() };
             mem::mb();
             data >= size_of_val(&self.interface.out)
         } {}
@@ -29,7 +52,7 @@ impl Console {
     }
 }
 
-impl io::Write for Console {
+impl<'a> io::Write for Console<'a> {
     //Listing 6.4 in The Definitive Guide to the Xen Hypervisor
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
         for b in buf {
@@ -40,16 +63,8 @@ impl io::Write for Console {
                 self.write_byte(*b);
             }
         }
-        let _result = unsafe { self.event_channel.notify(); };
+        let _result = unsafe { self.event_channel.notify() };
 
         Ok(buf.len())
     }
-}
-
-pub unsafe fn initialize(interface: xencons_interface, event_channel: EventChannel) {
-    let console = CONSOLE.write();
-    *console = Some (Console {
-        event_channel: event_channel,
-        interface: interface
-    })
 }

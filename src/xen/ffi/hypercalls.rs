@@ -120,7 +120,7 @@ pub mod grant_table_op {
         /// Output
         status          : i16,
         /// Output
-        frame_list      : XenGuestHandle<PageFrameNumber>
+        frame_list      : XenGuestHandle<MachineFrameNumber<[u8; 1024]>>
     }
     
     /*
