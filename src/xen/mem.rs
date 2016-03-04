@@ -1,3 +1,8 @@
+use core::ptr;
+
+pub static mut first_p2m_pfn: *const u64 = ptr::null();
+pub static mut nr_p2m_frames: u64 = 0;
+
 /// Current end of heap. Updated by `sbrk()`
 static mut heap_end : usize = 0;
 
