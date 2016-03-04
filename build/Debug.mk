@@ -40,4 +40,4 @@ clean: gdbsx_stop
 
 .PHONY: gdb
 gdb: gdbsx_start
-	$(GDB) -tui -ex "target remote localhost:$(GDBSX_PROC_PORT)"
+	$(GDB) -tui -ex "target remote localhost:$(GDBSX_PORT)"
