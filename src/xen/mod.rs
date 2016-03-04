@@ -1,17 +1,17 @@
 pub mod emergency_console;
-mod ffi;
-pub mod event_channels;
+pub mod ffi;
+mod event_channels;
 pub mod console;
 pub mod xenstore;
 pub mod mem;
 
+pub use xen::event_channels::EventChannel;
 use core::fmt;
 use core::fmt::Write;
 use core::str;
 use std::ops::DerefMove;
-pub use xen::ffi::start_info::*;
-
-use xen::ffi::hypercalls::sched_op;
+use xen::ffi::start_info::*;
+use xen::ffi::hypercalls::*;
 
 pub use xen::emergency_console::DEBUG;
 
@@ -63,17 +63,19 @@ pub unsafe fn initialize(info: StartInfoPage) {
         mod_start:          mod_start,
         mod_len:            mod_len,
         cmd_line:           cmd_line,
-        fist_p2m_pfn:       fist_p2m_pfn,
-        nr_p2r_frames:      nr_p2r_frames
+        first_p2m_pfn:      first_p2m_pfn,
+        nr_p2m_frames:      nr_p2m_frames
     } = info;
     
     writeln!(DEBUG, "prologue!").unwrap();
     writeln!(DEBUG, "Magic: {}", str::from_utf8(&magic).unwrap_or("ERROR")).unwrap();
     writeln!(DEBUG, "nr_pages: {}", nr_pages).unwrap();
-    //writeln!(DEBUG, "shared_info: {}", shared_info).unwrap();
+    mem::first_p2m_pfn = first_p2m_pfn.deref_move();
+    mem::nr_p2m_frames = nr_p2m_frames;
     writeln!(DEBUG, "console::initialize").unwrap();
-    console::initialize(console_mfn.deref_move().deref_move(), console_evtchn);
+    console::initialize(console_mfn.deref_move().deref_move(), EventChannel::new(console_evtchn));
+    writeln!(STDOUT, "Console initialized!").unwrap();
     writeln!(DEBUG, "xen::xenstore::initialize").unwrap();
-    xenstore::initialize(store_mfn.deref_move().deref_move(), store_evtchn);
+    xenstore::initialize(store_mfn.deref_move().deref_move(), EventChannel::new(store_evtchn));
     writeln!(DEBUG, "end of prologue!").unwrap();
 }

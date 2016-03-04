@@ -40,7 +40,7 @@ impl io::Write for Console {
                 self.write_byte(*b);
             }
         }
-        unsafe { self.event_channel.notify(); }
+        let _result = unsafe { self.event_channel.notify(); };
 
         Ok(buf.len())
     }

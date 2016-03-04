@@ -28,7 +28,6 @@ pub use xen::poweroff;
 pub use xen::STDOUT;
 pub use xen::mem::sbrk;
 pub use xen::DEBUG;
-use xen::StartInfoPage;
 use core::fmt::Write;
 use alloc::boxed::Box;
 
@@ -55,14 +54,14 @@ pub extern fn rust_begin_unwind(args: core::fmt::Arguments, file: &'static str, 
 }
 
 #[no_mangle]
-pub extern fn prologue(start_info_page : *const StartInfoPage) {
+pub extern fn prologue(start_info_page : *const xen::ffi::start_info::StartInfoPage) {
     unsafe {
         use core::ptr;
         let page = ptr::read(start_info_page);
         xen::initialize(page);
         let null: *const u8 = ptr::null();
         let argv: *const *const u8 = &null;
-        let _result = main(0, argv);
+        //let _result = main(0, argv);
     }
 }
 

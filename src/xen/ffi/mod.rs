@@ -29,15 +29,6 @@ impl DomID {
 #[repr(C)]
 pub struct Port(u32);
 
-#[derive(Debug)]
-pub struct EventChannel(Port);
-
-impl Drop for EventChannel {
-    fn drop(&mut self) {
-        let EventChannel(port) = *self;
-        hypercalls::event_channel_op::close(port);
-    }
-}
 
 #[derive(Debug)]
 #[repr(C)]
