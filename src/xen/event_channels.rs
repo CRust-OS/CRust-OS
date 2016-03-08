@@ -1,32 +1,30 @@
-use ::xen::hypercalls::*;
-use ::xen::hypercalls::event_channel_op::*;
+pub use xen::ffi::Port;
+use xen::ffi::hypercalls::NegErrnoval;
 
-pub struct EventChannel(pub u32);
+use xen::ffi::hypercalls::event_channel_op::*;
+
+#[derive(Debug)]
+pub struct EventChannel(Port);
+
+impl EventChannel {
+    pub fn new(p : Port) -> EventChannel {
+        EventChannel(p)
+    }
+}
 
 impl Drop for EventChannel {
-    fn drop (&mut self) {
-        unsafe {
-            let &mut EventChannel(ref mut port) = self;
-            let mut args = close::Args { port : Port(*port) };
-            let _result = hypercall!(
-                i64,
-                Command::event_channel_op,
-                SubCommand::close,
-                &mut args as *mut close::Args
-            );
-        }
+    fn drop(&mut self) {
+        let EventChannel(port) = *self;
+        close(port);
     }
 }
 
 impl EventChannel {
-    pub unsafe fn notify(&self) {
+    pub unsafe fn notify(&self) -> Result<(), NegErrnoval> {
         let EventChannel(port) = *self;
-        let mut args = send::Args { port : Port(port) };
-        let _result = hypercall!(
-            i64,
-            Command::event_channel_op,
-            SubCommand::send,
-            &mut args as *mut _
-        );
+        match send(&port) {
+            NegErrnoval::ALLGOOD => { Result::Ok(()) }
+            e => { Result::Err(e) }
+        }
     }
 }

@@ -2,23 +2,25 @@ macro_rules! hypercall {
     // Calling convention described here:
     // http://stackoverflow.com/questions/2535989/what-are-the-calling-conventions-for-unix-linux-system-calls-on-x86-64
     // This implementation based on the Mini-OS implementation of _hypercall0, _hypercall1, etc.
-    ($ty : ty, $op : expr) => {
+    ($op : expr) => {
         #[allow(unused_unsafe)] //https://github.com/rust-lang/rust/issues/8472
         unsafe { 
-            let result : isize;
+            use xen::ffi::hypercalls::NegErrnoval;
+            let result : NegErrnoval;
             asm!("call HYPERCALL_PAGE + ${1:c}"
                 : "={rax}" (result)
                 : "i" ($op as isize * 32)
                 : "memory" 
                 : "volatile"
             );					
-            result as $ty;
+            result
         }
     };
-    ($ty : ty, $op : expr, $a1 : expr) => {
+    ($op : expr, $a1 : expr) => {
         #[allow(unused_unsafe)] //https://github.com/rust-lang/rust/issues/8472
         unsafe { 
-            let result : isize;
+            use xen::ffi::hypercalls::NegErrnoval;
+            let result : NegErrnoval;
             let __ign1 : isize;
             asm!("call HYPERCALL_PAGE + ${2:c}"
                 : "={rax}" (result), 
@@ -28,13 +30,14 @@ macro_rules! hypercall {
                 : "memory" 
                 : "volatile"
             );					
-            result as $ty;
+            result
         }
     };
-    ($ty : ty, $op : expr, $a1 : expr, $a2 : expr) => {
+    ($op : expr, $a1 : expr, $a2 : expr) => {
         #[allow(unused_unsafe)] //https://github.com/rust-lang/rust/issues/8472
         unsafe { 
-            let result : isize;
+            use xen::ffi::hypercalls::NegErrnoval;
+            let result : NegErrnoval;
             let __ign1 : isize;
             let __ign2 : isize;
             asm!("call HYPERCALL_PAGE + ${3:c}"
@@ -45,13 +48,14 @@ macro_rules! hypercall {
                 : "memory" 
                 : "volatile"
             );					
-            result as $ty;
+            result
         }
     };
-    ($ty : ty, $op : expr, $a1 : expr, $a2 : expr, $a3 : expr) => {
+    ($op : expr, $a1 : expr, $a2 : expr, $a3 : expr) => {
         #[allow(unused_unsafe)] //https://github.com/rust-lang/rust/issues/8472
         unsafe { 
-            let result : isize;
+            use xen::ffi::hypercalls::NegErrnoval;
+            let result : NegErrnoval;
             let __ign1 : isize;
             let __ign2 : isize;
             let __ign3 : isize;
@@ -63,13 +67,14 @@ macro_rules! hypercall {
                 : "memory" 
                 : "volatile"
             );
-            result as $ty;
+            result
         }
     };
-    ($ty : ty, $op : expr, $a1 : expr, $a2 : expr, $a3 : expr, $a4 : expr) => {
+    ($op : expr, $a1 : expr, $a2 : expr, $a3 : expr, $a4 : expr) => {
         #[allow(unused_unsafe)] //https://github.com/rust-lang/rust/issues/8472
         unsafe { 
-            let result : isize;
+            use xen::ffi::hypercalls::NegErrnoval;
+            let result : NegErrnoval;
             let __ign1 : isize;
             let __ign2 : isize;
             let __ign3 : isize;
@@ -82,13 +87,14 @@ macro_rules! hypercall {
                 : "memory" 
                 : "volatile"
             );
-            result as $ty;
+            result
         }
     };
-    ($ty : ty, $op : expr, $a1 : expr, $a2 : expr, $a3 : expr, $a4 : expr) => {
+    ($op : expr, $a1 : expr, $a2 : expr, $a3 : expr, $a4 : expr) => {
         #[allow(unused_unsafe)] //https://github.com/rust-lang/rust/issues/8472
         unsafe { 
-            let result : isize;
+            use xen::ffi::hypercalls::NegErrnoval;
+            let result : NegErrnoval;
             let __ign1 : isize;
             let __ign2 : isize;
             let __ign3 : isize;
@@ -102,7 +108,7 @@ macro_rules! hypercall {
                 : "memory" 
                 : "volatile"
             );
-            result as $ty;
+            result
         }
     };
 }

@@ -9,6 +9,7 @@
 #![feature(start)]
 #![feature(reflect_marker)]
 #![feature(const_fn)]
+#![feature(type_ascription)]
 //#![feature(core_str_ext)]
 //#![feature(ptr_as_ref)]
 #![no_std]
@@ -17,24 +18,31 @@ extern crate rlibc;
 extern crate mm;
 extern crate alloc;
 extern crate collections;
+#[macro_use]
+extern crate x86;
 
 #[macro_use]
 mod std;
 mod xen;
 
 pub use xen::poweroff;
-pub use xen::console_io::STDOUT;
+pub use xen::STDOUT;
 pub use xen::mem::sbrk;
-pub use xen::emergency_console::EMERGENCY_CONSOLE as DEBUG;
-use xen::start_info::start_info_page;
+pub use xen::DEBUG;
 use core::fmt::Write;
 use alloc::boxed::Box;
 
 #[lang = "eh_personality"]
-extern fn eh_personality() {}
+unsafe extern fn eh_personality() {
+    int!(3);
+    xen::crash();
+}
 
 #[lang = "eh_unwind_resume"]
-extern fn eh_unwind_resume(_args: *mut u8) {}
+unsafe extern fn eh_unwind_resume(_args: *mut u8) {
+    int!(3);
+    xen::crash();
+}
 
 const LEN : usize = 3000;
 
@@ -46,26 +54,13 @@ pub extern fn rust_begin_unwind(args: core::fmt::Arguments, file: &'static str, 
     xen::crash();
 }
 
-fn print_init_info(){
-    writeln!(STDOUT, "Magic: {}", core::str::from_utf8(&start_info_page.magic).unwrap_or("ERROR")).unwrap();
-    writeln!(STDOUT, "nr_pages: {:#X}", start_info_page.nr_pages).unwrap();
-    writeln!(STDOUT, "shared_info: {:#X}", start_info_page.shared_info).unwrap();
-}
-
-
 #[no_mangle]
-pub extern fn prologue() {
+pub extern fn prologue(start_info_page : *mut xen::ffi::start_info::StartInfoPage) {
     unsafe {
-        writeln!(DEBUG, "prologue!").unwrap();
         use core::ptr;
+        xen::initialize(&mut *start_info_page);
         let null: *const u8 = ptr::null();
         let argv: *const *const u8 = &null;
-        writeln!(DEBUG, "mm::setup").unwrap();
-        writeln!(DEBUG, "xen::console_io::initialize").unwrap();
-        xen::console_io::initialize();
-        writeln!(DEBUG, "xen::xenstore::initialize").unwrap();
-        xen::xenstore::initialize();
-        writeln!(DEBUG, "end of prologue!").unwrap();
         let _result = main(0, argv);
     }
 }
@@ -112,7 +107,6 @@ pub fn main(_argc: isize, _argv: *const *const u8) -> isize {
     }
 
     writeln!(DEBUG, "done!").unwrap();
-    print_init_info();
 
     0
 }
