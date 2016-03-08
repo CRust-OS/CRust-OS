@@ -10,6 +10,7 @@
 #![feature(reflect_marker)]
 #![feature(const_fn)]
 #![feature(type_ascription)]
+#![feature(unique)]
 //#![feature(core_str_ext)]
 //#![feature(ptr_as_ref)]
 #![no_std]
@@ -58,7 +59,7 @@ pub extern fn rust_begin_unwind(args: core::fmt::Arguments, file: &'static str, 
 pub extern fn prologue(start_info_page : *mut xen::ffi::start_info::StartInfoPage) {
     unsafe {
         use core::ptr;
-        xen::initialize(&mut *start_info_page);
+        xen::initialize(ptr::read(start_info_page));
         let null: *const u8 = ptr::null();
         let argv: *const *const u8 = &null;
         let _result = main(0, argv);

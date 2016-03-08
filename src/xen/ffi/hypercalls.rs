@@ -310,13 +310,18 @@ pub mod event_channel_op {
          port: Port
     }
     
-    pub fn send(port: &Port) -> NegErrnoval {
-        let mut args = SendArgs { port : *port };
-        hypercall!(
-            Command::event_channel_op,
-            SubCommand::send,
-            &mut args as *mut _
-        )
+    pub fn send(port: &mut Port) -> NegErrnoval {
+        unsafe {
+            use core::mem;
+            use core::ptr;
+            let mut args: SendArgs = mem::uninitialized();
+            ptr::swap(&mut args.port, port);
+            hypercall!(
+                Command::event_channel_op,
+                SubCommand::send,
+                &mut args as *mut _
+            )
+        }
     }
     
     #[derive(Debug)]

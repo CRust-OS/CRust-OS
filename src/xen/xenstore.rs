@@ -2,6 +2,7 @@ use std::io::{self, Write, Read};
 use core::*;
 use core::iter::*;
 use core::mem::*;
+use core::ptr::Unique;
 use core::sync::atomic::*;
 use std::sync::RwLock;
 use xen::ffi::mem::*;
@@ -10,14 +11,14 @@ use xen::ffi::xenstore::*;
 use alloc::raw_vec::RawVec;
 use collections::{String, Vec};
 
-pub static XENSTORE: RwLock<Option<XenStore<'static>>> = RwLock::new(Option::None);
+pub static XENSTORE: RwLock<Option<XenStore>> = RwLock::new(Option::None);
 
-pub fn initialize(xenstore: &'static mut xenstore_domain_interface, event_channel: EventChannel) {
+pub fn initialize(xenstore: Unique<xenstore_domain_interface>, event_channel: EventChannel) {
     *(XENSTORE.write()) = Some(XenStore {interface: xenstore, event_channel: event_channel})
 }
 
-pub struct XenStore<'a> {
-    interface: &'a mut xenstore_domain_interface,
+pub struct XenStore {
+    interface: Unique<xenstore_domain_interface>,
     event_channel: EventChannel
 }
 
@@ -83,9 +84,11 @@ impl xenstore_domain_interface {
     }
 }
 
-impl<'a> XenStore<'a> {
+impl XenStore {
     unsafe fn send(&mut self, type_: xsd_sockmsg_type, params: &[&str]) -> io::Result<(xsd_sockmsg_type, String)> {
         use core::fmt::Write;
+        let interface = self.interface.get_mut();
+
         let req_id = req_counter.fetch_add(1, Ordering::Relaxed) as u32;
         // params are passed null-terminated
         let len = params.iter().fold (0, |acc, &x| acc + x.len() + 1) as u32;
@@ -96,24 +99,24 @@ impl<'a> XenStore<'a> {
             len: len
         };
         let msg_slice = slice::from_raw_parts(&msg as *const _ as *const u8, size_of::<xsd_sockmsg>());
-        try!(self.interface.write(msg_slice));
+        try!(interface.write(msg_slice));
 
         for p in params {
-            try!(self.interface.write(p.as_bytes()));
-            try!(self.interface.write("\0".as_bytes()));
+            try!(interface.write(p.as_bytes()));
+            try!(interface.write("\0".as_bytes()));
         }
 
         let _result = self.event_channel.notify();
 
         let mut response: xsd_sockmsg = uninitialized();
         let response_slice = slice::from_raw_parts_mut(&mut response as *mut _ as *mut u8, size_of::<xsd_sockmsg>());
-        try!(self.interface.read(response_slice));
+        try!(interface.read(response_slice));
         
         match (response.req_id, response.tx_id) {
             (req_id, 0) if req_id == msg.req_id => {
                 let mut result_vec = Vec::with_capacity(response.len as usize);
                 result_vec.resize(response.len as usize, 0);
-                self.interface.read(result_vec.as_mut_slice()).ok();
+                interface.read(result_vec.as_mut_slice()).ok();
                 let result = String::from_utf8(result_vec).unwrap();
                 Result::Ok((response.type_, result))
             }

@@ -25,7 +25,7 @@ impl DomID {
     pub const IDLE: DomID           = DomID(0x7FFF);
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug)]
 #[repr(C)]
 pub struct Port(u32);
 

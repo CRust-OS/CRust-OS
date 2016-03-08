@@ -1,5 +1,6 @@
 use core::fmt;
 use core::mem::size_of_val;
+use core::ptr::Unique;
 use std::io;
 use std::io::Write;
 use std::sync::RwLock;
@@ -7,9 +8,9 @@ use xen::ffi::mem;
 use xen::event_channels::*;
 use xen::ffi::console::*;
 
-static CONSOLE: RwLock<Option<Console<'static>>> = RwLock::new(Option::None);
+static CONSOLE: RwLock<Option<Console>> = RwLock::new(Option::None);
 
-pub fn initialize(console: &'static mut xencons_interface, event_channel: EventChannel) {
+pub fn initialize(console: Unique<xencons_interface>, event_channel: EventChannel) {
     *(CONSOLE.write()) = Some(Console { interface: console, event_channel: event_channel})
 }
 
@@ -31,28 +32,29 @@ impl fmt::Write for STDOUT {
     }
 }
 
-pub struct Console<'a> {
-    interface: &'a mut xencons_interface,
+pub struct Console {
+    interface: Unique<xencons_interface>,
     event_channel: EventChannel
 }
 
-impl<'a> Console<'a> {
+impl Console {
      fn write_byte(&mut self, byte: u8) {
+        let interface = unsafe { self.interface.get_mut() };
         while {
-            let data = (self.interface.out_prod - self.interface.out_cons) as usize;
+            let data = (interface.out_prod - interface.out_cons) as usize;
             let _result = unsafe { self.event_channel.notify() };
             mem::mb();
-            data >= size_of_val(&self.interface.out)
+            data >= size_of_val(&interface.out)
         } {}
 
-        let ring_index = mod_output_ring_size(self.interface.out_prod) as usize;
+        let ring_index = mod_output_ring_size(interface.out_prod) as usize;
         
-        self.interface.out[ring_index] = byte;
-        self.interface.out_prod = self.interface.out_prod.wrapping_add(1);
+        interface.out[ring_index] = byte;
+        interface.out_prod = interface.out_prod.wrapping_add(1);
     }
 }
 
-impl<'a> io::Write for Console<'a> {
+impl io::Write for Console {
     //Listing 6.4 in The Definitive Guide to the Xen Hypervisor
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
         for b in buf {

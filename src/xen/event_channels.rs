@@ -1,3 +1,4 @@
+use core::ptr;
 pub use xen::ffi::Port;
 use xen::ffi::hypercalls::NegErrnoval;
 
@@ -14,15 +15,16 @@ impl EventChannel {
 
 impl Drop for EventChannel {
     fn drop(&mut self) {
-        let EventChannel(port) = *self;
-        close(port);
+        let EventChannel(ref port) = *self;
+        let p = unsafe { ptr::read(port) };
+        close(p);
     }
 }
 
 impl EventChannel {
-    pub unsafe fn notify(&self) -> Result<(), NegErrnoval> {
-        let EventChannel(port) = *self;
-        match send(&port) {
+    pub unsafe fn notify(&mut self) -> Result<(), NegErrnoval> {
+        let EventChannel(ref mut port) = *self;
+        match send(port) {
             NegErrnoval::ALLGOOD => { Result::Ok(()) }
             e => { Result::Err(e) }
         }
