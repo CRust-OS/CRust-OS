@@ -315,7 +315,7 @@ pub mod event_channel_op {
             use core::mem;
             use core::ptr;
             let mut args: SendArgs = mem::uninitialized();
-            ptr::swap(&mut args.port, port);
+            args.port = ptr::read(port);
             hypercall!(
                 Command::event_channel_op,
                 SubCommand::send,
