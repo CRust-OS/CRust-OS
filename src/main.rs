@@ -60,6 +60,7 @@ pub extern fn prologue(start_info_page : *mut xen::ffi::start_info::StartInfoPag
     unsafe {
         use core::ptr;
         xen::initialize(ptr::read(start_info_page));
+        writeln!(STDOUT, "args: {}", core::str::from_utf8(&ptr::read(start_info_page).cmd_line).unwrap_or("ERROR")).unwrap();
         let null: *const u8 = ptr::null();
         let argv: *const *const u8 = &null;
         let _result = main(0, argv);
@@ -69,7 +70,6 @@ pub extern fn prologue(start_info_page : *mut xen::ffi::start_info::StartInfoPag
 #[start]
 pub fn main(_argc: isize, _argv: *const *const u8) -> isize {
     writeln!(STDOUT, "main!").unwrap();
-
     let mut s = collections::String::new();
     writeln!(STDOUT, "Growing sequences of numbers to test allocation...").unwrap();
     for _ in 0 .. 1 {

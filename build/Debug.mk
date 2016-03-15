@@ -6,7 +6,7 @@ DOM_ID = $(shell echo $$($(XL) domid $(DOMAIN_NAME) 2> /dev/null))
 
 .PHONY: dom_create
 dom_create: $(OUT_DIR)/crust crust.cfg var_DOMAIN_NAME dom_destroy
-	$(if $(DOM_ID),,$(XL) create -p crust.cfg 'name="$(DOMAIN_NAME)"' 'kernel="$<"')
+	$(if $(DOM_ID),,$(XL) create -p crust.cfg 'name="$(DOMAIN_NAME)"' 'kernel="$<"' 'cmdline="$(CRUST_ARGS)"' )
 
 .PHONY: dom_destroy
 dom_destroy:
