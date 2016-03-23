@@ -40,7 +40,7 @@ unsafe extern fn eh_personality() {
 }
 
 #[lang = "eh_unwind_resume"]
-unsafe extern fn eh_unwind_resume(_args: *mut u8) {
+unsafe extern fn eh_unwind_resume(_args: *mut u8) -> ! {
     int!(3);
     xen::crash();
 }

@@ -3,7 +3,9 @@
 SHELL = /bin/bash
 
 PROFILE ?= debug
+TOOLCHAIN ?= nightly
 TARGET_TRIPLE ?= x86_64-unknown-xen
+RUSTLIB ?= $(HOME)/.multirust/toolchains/$(TOOLCHAIN)/lib/rustlib/$(TARGET_TRIPLE)/lib
 OUT_DIR = target/$(TARGET_TRIPLE)/$(PROFILE)
 
 # Macros, constants, etc.
