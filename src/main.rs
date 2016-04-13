@@ -19,6 +19,7 @@ extern crate rlibc;
 extern crate mm;
 extern crate alloc;
 extern crate collections;
+extern crate calculator;
 #[macro_use]
 extern crate x86;
 
@@ -60,7 +61,18 @@ pub extern fn prologue(start_info_page : *mut xen::ffi::start_info::StartInfoPag
     unsafe {
         use core::ptr;
         xen::initialize(ptr::read(start_info_page));
-        writeln!(STDOUT, "args: {}", core::str::from_utf8(&ptr::read(start_info_page).cmd_line).unwrap_or("ERROR")).unwrap();
+        //writeln!(STDOUT, "args: {}", core::str::from_utf8(&ptr::read(start_info_page).cmd_line).unwrap_or("ERROR")).unwrap();
+        let cmd_line = ptr::read(start_info_page).cmd_line;
+	let line = core::str::from_utf8(&cmd_line).unwrap_or("");
+	let mut i = 0;
+	for c in line.chars() {
+            if c == '\0' { break; }
+            i = i + 1;
+	}
+        let l = &line[..i];
+	writeln!(STDOUT, "FIRST NULL: {}", i);
+	writeln!(STDOUT, "LINE: '{}'", l);
+	writeln!(STDOUT, "{} = {}", l, calculator::parse_line(l).expect("Error parsing line"));
         let null: *const u8 = ptr::null();
         let argv: *const *const u8 = &null;
         let _result = main(0, argv);

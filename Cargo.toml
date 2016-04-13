@@ -6,6 +6,7 @@ authors = ["Carl Patenaude-Poulin <carl.patenaudepoulin@mail.mcgill.ca>", "Scott
 [dependencies]
 rlibc = "*"
 x86 = "*"
+calculator = { git = "https://github.com/CRust-OS/Calculator.git" }
 
 [dependencies.mm]
 path = "./mm"
