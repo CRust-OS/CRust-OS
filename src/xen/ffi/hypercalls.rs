@@ -71,7 +71,6 @@ enum Command {
 //pub mod xen_version;
 
 pub mod console_io {
-    use xen::ffi::hypercalls::Command;
     
     #[derive(Debug)]
     #[repr(usize)]
@@ -82,14 +81,13 @@ pub mod console_io {
     }
     
     pub fn write(buf: &[u8]) {
-        hypercall!(Command::console_io, SubCommand::write, buf.len(), buf.as_ptr());
+        hypercall(Command::console_io, SubCommand::write as usize, buf.len(), buf.as_ptr(), 0);
     }
 }
 
 //pub mod physdev_op_compat;
 
 pub mod grant_table_op {
-    use xen::ffi::*;
     
     #[repr(usize)]
     #[allow(non_camel_case_types)]
@@ -204,12 +202,12 @@ pub mod sched_op {
     }
     
     pub fn shutdown(reason: ShutdownReason) -> ! {
-        hypercall!(
+        hypercall(
             Command::sched_op,
-            SubCommand::shutdown, 
+            SubCommand::shutdown as usize, 
             &ShutdownArgs {
                 reason: reason
-            } as *const ShutdownArgs
+            } as *const ShutdownArgs as usize
         );
         loop {}
     }
@@ -296,10 +294,10 @@ pub mod event_channel_op {
     pub fn close (p: Port) {
         unsafe {
             let mut args = CloseArgs { port: p };
-            let _result = hypercall!(
+            let _result = hypercall(
                 Command::event_channel_op,
-                SubCommand::close,
-                &mut args as *mut CloseArgs
+                SubCommand::close as usize,
+                &mut args as *mut CloseArgs as usize
             );
         }
     }
@@ -316,10 +314,10 @@ pub mod event_channel_op {
             use core::ptr;
             let mut args: SendArgs = mem::uninitialized();
             args.port = ptr::read(port);
-            hypercall!(
+            hypercall(
                 Command::event_channel_op,
-                SubCommand::send,
-                &mut args as *mut _
+                SubCommand::send as usize,
+                &mut args as *mut _ as usize
             )
         }
     }

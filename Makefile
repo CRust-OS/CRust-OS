@@ -4,15 +4,17 @@ SHELL = /bin/bash
 
 PROFILE ?= debug
 TOOLCHAIN ?= nightly
-TARGET_TRIPLE ?= x86_64-unknown-xen
-RUSTLIB ?= $(HOME)/.multirust/toolchains/$(TOOLCHAIN)/lib/rustlib/$(TARGET_TRIPLE)/lib
-OUT_DIR = target/$(TARGET_TRIPLE)/$(PROFILE)
+TARGET ?= x86_64-unknown-xen
+OUT_DIR = target/$(TARGET)/$(PROFILE)
 
 # Macros, constants, etc.
 include build/Utils.mk
 
 # All targets treated as secondary (implicit rules can be chained arbitrarily)
 .SECONDARY:
+
+# Turn off implicit rules
+.SUFFIXES:
 
 .PHONY: all
 all: $(OUT_DIR)/crust

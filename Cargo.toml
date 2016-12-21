@@ -4,11 +4,10 @@ version = "0.1.0"
 authors = ["Carl Patenaude-Poulin <carl.patenaudepoulin@mail.mcgill.ca>", "Scott Cooper <scott.cooper2@mail.mcgill.ca"]
 
 [dependencies]
+raw-cpuid = "2.0.1"
 rlibc = "*"
 x86 = "*"
 calculator = { git = "https://github.com/CRust-OS/Calculator.git" }
 
 [dependencies.mm]
 path = "./mm"
-
-

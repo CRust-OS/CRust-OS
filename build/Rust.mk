@@ -1,9 +1,9 @@
 #CARGO_ARGS += --release
 
 CARGO = cargo
-CARGO_ARGS += --target $(TARGET_TRIPLE)
+CARGO_ARGS += --target $(TARGET)
 
-CARGO_DEPS += $(TARGET_FILE)
+CARGO_DEPS += $(TARGET).json
 CARGO_DEPS += crust.lds
 CARGO_DEPS += Cargo.toml
 CARGO_DEPS += Cargo.lock
@@ -13,10 +13,9 @@ RUST_FILES = $(shell find $(SRC) -name "*.rs")
 $(DEPS)/$(OUT_DIR)/crust.d: $(RUST_FILES)
 -include $(DEPS)/$(OUT_DIR)/crust.d
 
-$(OUT_DIR)/crust: $(CARGO_DEPS) $(BIN)/boot.o $(RUNTIME)
+$(OUT_DIR)/crust: $(CARGO_DEPS) $(BIN)/boot.o $(RLIBS)
 	$(MKDIR) $(@D)
-	$(ECHO) 'Warning: if the following fails with "error: can'"'"'t find crate for `core`" or "the crate `core` has been compiled with ...", you need to `multirust update` and `make clean-runtime`.'
-	$(CARGO) build $(CARGO_ARGS)
+	RUSTFLAGS="--sysroot $(SYSROOT)" $(CARGO) build --target $(TARGET)
 	@[ -e $@ ] && touch $@ # Cargo doesn't always update timestamp
 
 .PHONY: cargo-clean

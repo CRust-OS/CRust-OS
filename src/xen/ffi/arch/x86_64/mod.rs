@@ -1,10 +1,28 @@
 use xen::ffi::{GuestPhysicalFrameNumber, MachineFrameNumber};
 use core::ops::{Deref, DerefMut};
 
-#[macro_use]
-mod hypercall_macros;
-
 pub mod mem;
+
+// "[The hypercall macro] calls the address at 32 times the hypercall number
+// offset from the start of the hypercall page. Because the page size on x86 is
+// four kilobytes, this gives a maximum of 128 hypercalls."
+#[repr(C)]
+struct HypercallPageEntry ([u8; 32]);
+
+extern {
+    static HYPERCALL_PAGE: [HypercallPageEntry; 128];
+}
+
+pub unsafe fn hypercall(op: Command, a1: usize, a2: usize, a3: usize, a4: usize, a5: usize) -> NegErrnoval {
+    let result: NegErrnoval;
+    asm!( "call *$1"
+        : "={rax}" (result)
+        : "r" (HYPERCALL_PAGE[op as isize]), "{rdi}" (a1), "{rsi}" (a2), "{rdx}" (a3), "{r10}" (a4), "{r8}" (a5)
+        : "memory"
+        : "volatile");
+    result
+}
+
 
 const PAGE_SHIFT: usize = 12;
 

@@ -1,11 +1,12 @@
 #![feature(lang_items)]
 #![feature(collections)]
 #![feature(asm)]
+#![feature(drop_types_in_const)]
 #![feature(stmt_expr_attributes)]
-#![feature(type_macros)]
 #![feature(associated_consts)]
 #![feature(allocator)]
 #![feature(alloc)]
+#![feature(no_debug)]
 #![feature(start)]
 #![feature(reflect_marker)]
 #![feature(const_fn)]
@@ -41,7 +42,9 @@ unsafe extern fn eh_personality() {
 }
 
 #[lang = "eh_unwind_resume"]
-unsafe extern fn eh_unwind_resume(_args: *mut u8) -> ! {
+#[no_mangle]
+#[no_debug]
+unsafe extern fn rust_eh_unwind_resume(_args: *mut u8) -> ! {
     int!(3);
     xen::crash();
 }
