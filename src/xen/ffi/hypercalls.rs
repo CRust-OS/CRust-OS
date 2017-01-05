@@ -1,7 +1,8 @@
+
 #[derive(Debug)]
 #[repr(usize)]
 #[allow(non_camel_case_types)]
-enum Command {
+pub enum Command {
     set_trap_table      = 0,
     mmu_update          = 1,
     set_gdt             = 2,
@@ -71,6 +72,8 @@ enum Command {
 //pub mod xen_version;
 
 pub mod console_io {
+    use xen::ffi::arch::x86_64::hypercall;
+    use xen::ffi::hypercalls::Command;
     
     #[derive(Debug)]
     #[repr(usize)]
@@ -88,6 +91,10 @@ pub mod console_io {
 //pub mod physdev_op_compat;
 
 pub mod grant_table_op {
+    use xen::ffi::MachineFrameNumber;
+    use xen::ffi::XenGuestHandle;
+    use xen::ffi::arch::x86_64::hypercall;
+    use xen::ffi::DomID;
     
     #[repr(usize)]
     #[allow(non_camel_case_types)]
@@ -167,6 +174,7 @@ pub mod grant_table_op {
 
 pub mod sched_op {
     use xen::ffi::hypercalls::Command;
+    use xen::ffi::arch::x86_64::hypercall;
     
     #[derive(Debug)]
     #[repr(usize)]
@@ -224,6 +232,7 @@ pub mod sched_op {
 pub mod event_channel_op {
     use xen::ffi::hypercalls::{Command, NegErrnoval};
     use xen::ffi::{DomID, Port, Vcpu};
+    use xen::ffi::arch::x86_64::hypercall;
     
     #[derive(Debug)]
     #[repr(usize)]
