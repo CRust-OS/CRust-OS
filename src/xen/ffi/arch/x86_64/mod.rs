@@ -1,5 +1,7 @@
 use xen::ffi::{GuestPhysicalFrameNumber, MachineFrameNumber};
 use core::ops::{Deref, DerefMut};
+use xen::ffi::hypercalls::NegErrnoval;
+use xen::ffi::hypercalls::Command;
 
 pub mod mem;
 
